@@ -1,0 +1,8 @@
+.idea
+.vs
+cmake-build-*
+build
+CMakeSettings.json
+types
+passing_bm
+passing.o
