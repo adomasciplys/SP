@@ -88,6 +88,13 @@ IMPORTANT: when measuring *performance*, always use **Release** preset (CMake co
    - Compare the data layout.
 3. Measure and compare performance:
    - Which one is faster?
+     - The array version should be faster as it does not have the overhead of `std::vector` member functions.
+     - But, they should be very close in performance.
+     - However, the difference should be small as the main work is done by swapping elements which is similar in both cases
+     - But, my results are the following:
+       - 2: swap_ends_array_bm: 0.323 ± 0.0359904 μs (1000)
+       - 2: swap_ends_vector_bm: 0.204 ± 0.0252975 μs (1000)
+     - The vector version is faster, possibly due to better optimizations by the compiler for `std::vector` operations :shrug
 
 Tips:
 - Create a new file for benchmark executable, say `swap_bm.cpp`, then append the following to [CMakeLists.txt](CMakeLists.txt) and reload CMake and run `swap_bm` target:

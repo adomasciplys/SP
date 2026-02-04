@@ -25,6 +25,13 @@ enable_testing()
 add_executable(types types.cpp)
 add_test(NAME types COMMAND types)
 
+# Add swap to project
+add_executable(swap swap_main.cpp swap.cpp)
+add_executable(swap_bm swap_bm.cpp swap.cpp)
+
+add_test(NAME swap_bm COMMAND swap_bm)
+set_tests_properties(swap_bm swap_bm PROPERTIES RUN_SERIAL ON)
+
 # Tests for measure.hpp library:
 add_executable(measure_test measure_test.cpp)
 add_test(NAME measure_test COMMAND measure_test 20)
