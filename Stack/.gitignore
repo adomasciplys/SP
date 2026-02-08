@@ -1,0 +1,14 @@
+.idea
+.vs
+cmake-build-*
+build-*
+build
+out
+stack.o
+stack.obj
+stack_test
+stack_test.obj
+stack_test.exe
+stack_test.ilk
+stack_test.pdb
+vc140.pdb
