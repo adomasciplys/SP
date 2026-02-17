@@ -196,9 +196,6 @@ TEST_CASE("operator< using amplitudes")
     CHECK(ns2 < ns1);
 }
 
-
-/** TODO: add -DLSAN=ON to CMake options (Debug build) and see if the memory leak is caught
-// NOTE: works only on native compilers, i.e. VisualStudio on Windows, AppleClang on macOS, GCC/Clang on Linux
 TEST_CASE("Memory Leak")
 {
     auto os = std::ostringstream{};
@@ -206,10 +203,7 @@ TEST_CASE("Memory Leak")
     os << std::hex << *ns;
     CHECK(os.str() == "deadbeef");
 }
-*/
 
-/** TODO: add -DASAN=ON to CMake options (Debug build) and see if the buffer overflow is caught
-// NOTE: works only on native compilers, i.e. VisualStudio on Windows, AppleClang on macOS, GCC/Clang on Linux
 TEST_CASE("Buffer Overflow")
 {
     auto os = std::ostringstream{};
@@ -218,6 +212,5 @@ TEST_CASE("Buffer Overflow")
     CHECK(os.str() != "7");
     delete pi;
 }
-*/
 
 TEST_SUITE_END();

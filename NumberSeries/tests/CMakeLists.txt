@@ -18,7 +18,7 @@ if (NUMBER_SERIES_BM)
     add_test(NAME number_series_bm COMMAND number_series_bm --benchmark_out_format=json --benchmark_out=number_series_bm.json)
 
     set_tests_properties(sort_bm number_series_bm PROPERTIES RUN_SERIAL TRUE)
-
+    set(PYTHON_COMMAND "$ENV{HOME}/venv/bin/python3")
     if (PYTHON_COMMAND)
         add_test(NAME sort_plot
             COMMAND ${PYTHON_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/plot.py --logx --logy sort_bm.json)
