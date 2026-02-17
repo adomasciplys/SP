@@ -19,6 +19,7 @@ namespace DataSeries
         std::vector<int> data = std::vector<int>();
         int max_val = 0;
         int min_val = 0;
+        int dummy[100];
     public:
         NumberSeries();
         NumberSeries(std::initializer_list<int>);

@@ -28,14 +28,6 @@ auto make_wrapper(size_t ns_number, size_t ns_length)
     return vw;
 };
 
-// ---------------------------------------------------------------
-//  Benchmark                   Time             CPU     Iterations
-// ---------------------------------------------------------------
-// bm_sort/100/100             1041 ns         1042 ns       691802
-// bm_sort/1000/100            6262 ns         6257 ns       110789
-// bm_sort/10000/100         208047 ns       207298 ns         3365
-// bm_sort/100000/100       2360146 ns      2353813 ns          288
-
 static void ns_sort(benchmark::State& state)
 {
     const auto ns_number = state.range(0);
@@ -52,7 +44,7 @@ static void ns_sort(benchmark::State& state)
 }
 BENCHMARK(ns_sort)->ArgPair(100'000, 100)->ArgPair(10'000, 100)->ArgPair(1'000, 100);
 
-// -----------------------------------------------------------------
+// ------------------- BEFORE ADDING DUMMY ----------------------------------------------
 // Benchmark                       Time             CPU   Iterations
 // -----------------------------------------------------------------
 // ns_sort/100000/100        7914085 ns      7899182 ns           88
@@ -61,6 +53,16 @@ BENCHMARK(ns_sort)->ArgPair(100'000, 100)->ArgPair(10'000, 100)->ArgPair(1'000, 
 // nswrap_sort/100000/100   10903951 ns     10881371 ns           62
 // nswrap_sort/10000/100      852711 ns       851663 ns         1053
 // nswrap_sort/1000/100        45533 ns        45489 ns        16014
+
+// -----------------------------------------------------------------
+//   Benchmark                       Time             CPU   Iterations
+// -----------------------------------------------------------------
+// ns_sort/100000/100       26684981 ns     26443692 ns           26
+// ns_sort/10000/100         1827401 ns      1818430 ns          393
+// ns_sort/1000/100           115806 ns       114600 ns         6005
+// nswrap_sort/100000/100   19260703 ns     18899162 ns           37
+// nswrap_sort/10000/100     1723111 ns      1684346 ns          593
+// nswrap_sort/1000/100        55820 ns        55434 ns        11514
 
 static void nswrap_sort(benchmark::State& state)
 {
