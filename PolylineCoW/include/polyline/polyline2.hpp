@@ -9,7 +9,7 @@ namespace poly {
 
 struct Polyline2
 {
-    Polyline2() : points(new std::vector<Point>{}), shared(true) {}
+    Polyline2() : points(new std::vector<Point>{}) {}
 
     ~Polyline2() noexcept
     {
@@ -21,7 +21,6 @@ struct Polyline2
     Polyline2& operator=(const Polyline2& poly)
     {
         if (this != &poly) {
-
                 if (!shared) {
                     delete points;
                 }
@@ -39,6 +38,7 @@ struct Polyline2
     }
 
     Polyline2(const Polyline2& other) { *this = other; }
+
     Polyline2(Polyline2&& poly) noexcept { *this = std::move(poly); }
 
     void operator+=(const Point& new_point)
