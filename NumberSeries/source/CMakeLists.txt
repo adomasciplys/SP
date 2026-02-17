@@ -1,0 +1,1 @@
+add_library(number_series OBJECT number_series.cpp)
