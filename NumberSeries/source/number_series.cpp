@@ -41,17 +41,17 @@ namespace DataSeries
         }
     }
 
-    NumberSeries& NumberSeries::make_random(unsigned long length, int min, int max)
+    NumberSeries NumberSeries::make_random(unsigned long length, int min, int max)
     {
-        auto series = new NumberSeries();
+        auto series = NumberSeries();
         std::mt19937 generator(std::random_device{}());
         std::uniform_int_distribution<int> distribution(min, max);
 
         for (unsigned long i = 0; i < length; ++i) {
-            series->add_value(distribution(generator));
+            series.add_value(distribution(generator));
         }
 
-        return *series;
+        return series;
     }
 
     NumberSeries& NumberSeries::operator+=(const NumberSeries& other)
@@ -73,7 +73,7 @@ namespace DataSeries
     {
         auto result = *this; // Create a copy of the current object
         result += other;     // Use operator+= to add the other series
-        return result;        // Return the modified copy
+        return result;    // Return the modified copy
     }
 
     bool NumberSeries::operator<(const NumberSeries& other) const
@@ -114,11 +114,11 @@ namespace DataSeries
         number_series->add_value(value);
     }
 
-    NumberSeriesWrap& NumberSeriesWrap::make_random(unsigned long length, int min, int max)
+    NumberSeriesWrap NumberSeriesWrap::make_random(unsigned long length, int min, int max)
     {
-        auto wrap = new NumberSeriesWrap();
-        wrap->number_series = std::make_unique<NumberSeries>(NumberSeries::make_random(length, min, max));
-        return *wrap;
+        auto wrap = NumberSeriesWrap();
+        wrap.number_series = std::make_unique<NumberSeries>(NumberSeries::make_random(length, min, max));
+        return wrap;
     }
 
     NumberSeriesWrap& NumberSeriesWrap::operator+=(const NumberSeriesWrap& other)
