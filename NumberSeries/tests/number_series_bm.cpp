@@ -9,7 +9,7 @@ auto make_vv(size_t ns_number, size_t ns_length)
     vv.reserve(ns_number);  // preallocate memory
 
     for (size_t i = 0; i < ns_number; ++i) {
-        vv.emplace_back(NumberSeries::make_random(100));
+        vv.emplace_back(NumberSeries::make_random(ns_length));
     }
 
     return vv;
@@ -22,7 +22,7 @@ auto make_wrapper(size_t ns_number, size_t ns_length)
     vw.reserve(ns_number);  // preallocate memory
 
     for (size_t i = 0; i < ns_number; ++i) {
-        vw.emplace_back(NumberSeriesWrap::make_random(100));
+        vw.emplace_back(NumberSeriesWrap::make_random(ns_length));
     }
 
     return vw;
@@ -44,25 +44,30 @@ static void ns_sort(benchmark::State& state)
 }
 BENCHMARK(ns_sort)->ArgPair(100'000, 100)->ArgPair(10'000, 100)->ArgPair(1'000, 100);
 
-// ------------------- BEFORE ADDING DUMMY ----------------------------------------------
-// Benchmark                       Time             CPU   Iterations
-// -----------------------------------------------------------------
-// ns_sort/100000/100        7914085 ns      7899182 ns           88
-// ns_sort/10000/100          378186 ns       376523 ns         1836
-// ns_sort/1000/100            25858 ns        25778 ns        26241
-// nswrap_sort/100000/100   10903951 ns     10881371 ns           62
-// nswrap_sort/10000/100      852711 ns       851663 ns         1053
-// nswrap_sort/1000/100        45533 ns        45489 ns        16014
+ // ----------------- BEFORE ADDING DUMMY DATA------------------------------------------------
+ // Benchmark                       Time             CPU   Iterations
+ // -----------------------------------------------------------------
+ // ns_sort/100000/100        7863218 ns      7846057 ns           88
+ // ns_sort/10000/100          358389 ns       357360 ns         1936
+ // ns_sort/1000/100            26504 ns        26460 ns        27297
+ // nswrap_sort/100000/100   12793249 ns     12728849 ns           53
+ // nswrap_sort/10000/100      649653 ns       645332 ns         1124
+ // nswrap_sort/1000/100        49560 ns        49457 ns        14211
 
-// -----------------------------------------------------------------
-//   Benchmark                       Time             CPU   Iterations
-// -----------------------------------------------------------------
-// ns_sort/100000/100       26684981 ns     26443692 ns           26
-// ns_sort/10000/100         1827401 ns      1818430 ns          393
-// ns_sort/1000/100           115806 ns       114600 ns         6005
-// nswrap_sort/100000/100   19260703 ns     18899162 ns           37
-// nswrap_sort/10000/100     1723111 ns      1684346 ns          593
-// nswrap_sort/1000/100        55820 ns        55434 ns        11514
+// --------------------- AFTER ADDING DUMMY DATA --------------------------------------------
+// Benchmark                       Time             CPU   Iterations
+//  -----------------------------------------------------------------
+//  ns_sort/100000/100       27963196 ns     26655821 ns           28
+//  ns_sort/10000/100         2024977 ns      1729912 ns          410
+//  ns_sort/1000/100           109612 ns       108881 ns         6622
+//  nswrap_sort/100000/100   20734535 ns     19682143 ns           35
+//  nswrap_sort/10000/100      918942 ns       909594 ns          845
+//  nswrap_sort/1000/100        50777 ns        50663 ns        13411
+
+//  If I include the dummy data then NumberSeriesWrap sorting becomes faster than NumberSeries sorting
+//  Before dummy: NumberSeriesWrap is slower (because NumberSeries objects are small?)
+//  After dummy: move/swap cost dominates for plain NumberSeries, and NumberSeriesWrap wins by moving pointers.
+
 
 static void nswrap_sort(benchmark::State& state)
 {

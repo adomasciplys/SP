@@ -23,7 +23,7 @@ namespace DataSeries
 
     public:
         // Constructors
-        NumberSeries();
+        NumberSeries() = default;
         NumberSeries(std::initializer_list<int>);
 
         // Getters and small helpers
@@ -48,26 +48,10 @@ namespace DataSeries
     public:
         NumberSeriesWrap();
         NumberSeriesWrap(std::initializer_list<int>);
-
-        NumberSeriesWrap(const NumberSeriesWrap& other)
-            : number_series(std::make_unique<NumberSeries>(*other.number_series)) {}
-
-        NumberSeriesWrap(NumberSeriesWrap&& other) noexcept
-            : number_series(std::move(other.number_series)) {}
-
-        NumberSeriesWrap& operator=(const NumberSeriesWrap& other)
-        {
-            if (this != &other) {
-                number_series = std::make_unique<NumberSeries>(*other.number_series);
-            }
-            return *this;
-        }
-
-        NumberSeriesWrap& operator=(NumberSeriesWrap&& other) noexcept
-        {
-            number_series.swap(other.number_series);
-            return *this;
-        }
+        NumberSeriesWrap(const NumberSeriesWrap& other);
+        NumberSeriesWrap(NumberSeriesWrap&& other) noexcept;
+        NumberSeriesWrap& operator=(const NumberSeriesWrap& other);
+        NumberSeriesWrap& operator=(NumberSeriesWrap&& other) noexcept;
 
         unsigned long size() const;
         int max() const;

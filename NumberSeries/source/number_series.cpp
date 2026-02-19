@@ -9,8 +9,6 @@
 
 namespace DataSeries
 {
-    NumberSeries::NumberSeries() = default;
-    NumberSeriesWrap::NumberSeriesWrap() = default;
     NumberSeries::NumberSeries(std::initializer_list<int> list)
     {
         for (int const value : list) {
@@ -28,22 +26,18 @@ namespace DataSeries
 
     void NumberSeries::add_value(int value)
     {
-        if (size() == 0) {
-            data.push_back(value);
-            min_val = value;
-            max_val = value;
+        if (data.empty()) {
+            min_val = max_val = value; // If this is the first entry, min and max are the same
         } else {
-            data.push_back(value);
-            if (value <= min_val)
-                min_val = value;
-            if (value >= max_val)
-                max_val = value;
+            min_val = std::min(min_val, value);
+            max_val = std::max(max_val, value);
         }
+        data.push_back(value);
     }
 
     NumberSeries NumberSeries::make_random(unsigned long length, int min, int max)
     {
-        auto series = NumberSeries();
+        NumberSeries series;
         std::mt19937 generator(std::random_device{}());
         std::uniform_int_distribution<int> distribution(min, max);
 
@@ -54,17 +48,19 @@ namespace DataSeries
         return series;
     }
 
+
     NumberSeries& NumberSeries::operator+=(const NumberSeries& other)
     {
-        auto result = NumberSeries();  // Create on stack, not heap
-        auto max_size = std::max(size(), other.size());
+        auto result = NumberSeries();
+        auto max_size = std::max(size(), other.size()); // Find the size/length of the new vector
 
         for (auto i = 0; i < max_size; ++i) {
-            int left_val = (i < size()) ? data[i] : 0;
+            int left_val = (i < size()) ? data[i] : 0; //Keep looping until there is no more data
             int right_val = (i < other.size()) ? other.data[i] : 0;
             result.add_value(left_val + right_val);
         }
 
+        // This seems stupid, but I did not manage to do the updates in place....
         *this = result;
         return *this;
     }
@@ -72,8 +68,7 @@ namespace DataSeries
     NumberSeries NumberSeries::operator+(const NumberSeries& other) const
     {
         auto result = *this; // Create a copy of the current object
-        result += other;     // Use operator+= to add the other series
-        return result;    // Return the modified copy
+        return result += other;
     }
 
     bool NumberSeries::operator<(const NumberSeries& other) const
@@ -83,8 +78,35 @@ namespace DataSeries
 
     // --- Number Series Wrap ---
 
+    NumberSeriesWrap::NumberSeriesWrap()
+    {
+        // Always initialize so I do not have to null check in NumberSeriesWrap methods.
+        number_series = std::make_unique<NumberSeries>();
+    }
+
+    // Pass to NumberSeries list constructor
     NumberSeriesWrap::NumberSeriesWrap(std::initializer_list<int> list) :
         number_series(std::make_unique<NumberSeries>(list)){}
+
+    NumberSeriesWrap::NumberSeriesWrap(const NumberSeriesWrap& other)
+        : number_series(std::make_unique<NumberSeries>(*other.number_series)) {}
+
+    NumberSeriesWrap::NumberSeriesWrap(NumberSeriesWrap&& other) noexcept
+        : number_series(std::move(other.number_series)) {}
+
+    NumberSeriesWrap& NumberSeriesWrap::operator=(const NumberSeriesWrap& other)
+    {
+        if (this != &other) {
+            number_series = std::make_unique<NumberSeries>(*other.number_series);
+        }
+        return *this;
+    }
+
+    NumberSeriesWrap& NumberSeriesWrap::operator=(NumberSeriesWrap&& other) noexcept
+    {
+        number_series.swap(other.number_series);
+        return *this;
+    }
 
     unsigned long NumberSeriesWrap::size() const
     {
@@ -106,11 +128,7 @@ namespace DataSeries
         return number_series->amplitude();
     }
 
-    void NumberSeriesWrap::add_value(int value)
-    {
-        if (!number_series) {
-            number_series = std::make_unique<NumberSeries>();
-        }
+    void NumberSeriesWrap::add_value(int value) {
         number_series->add_value(value);
     }
 
@@ -123,9 +141,6 @@ namespace DataSeries
 
     NumberSeriesWrap& NumberSeriesWrap::operator+=(const NumberSeriesWrap& other)
     {
-        if (!number_series) {
-            number_series = std::make_unique<NumberSeries>();
-        }
         if (other.number_series) {
             *number_series += *other.number_series;
         }
@@ -135,8 +150,7 @@ namespace DataSeries
     NumberSeriesWrap NumberSeriesWrap::operator+(const NumberSeriesWrap& other) const
     {
         auto result = *this;
-        result += other;
-        return result;
+        return result += other;
     }
 
     bool NumberSeriesWrap::operator<(const NumberSeriesWrap& other) const
