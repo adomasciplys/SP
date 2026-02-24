@@ -8,7 +8,7 @@ TEST_CASE("Calculate expressions lazily")
 {
     auto sys = calculator::symbol_table_t{}; // create a symbol table for variables
     auto a = sys.var("a", 2); // create a variable with name "a" and initial value of 2
-    auto b = sys.var("b", 3); // create a variable with name "b" and initial value of 2
+    auto b = sys.var("b", 3); // create a variable with name "b" and initial value of 3
     auto c = sys.var("c");    // create a variable with name "c" and default-initialize with 0
     auto state = sys.state(); // create a system state initialized with variable initial values
     auto os = std::ostringstream(); // string stream to output to
@@ -39,6 +39,7 @@ TEST_CASE("Calculate expressions lazily")
         CHECK(c(state) == 0);
         CHECK((c <<= b - a)(state) == 1);
         CHECK(c(state) == 1);
+
         /*
         // TODO: implement multiplication
         CHECK((c += b - a * c)(state) == 2);
@@ -56,7 +57,7 @@ TEST_CASE("Calculate expressions lazily")
         CHECK((a - (b - c))(state) == -1);
         CHECK((a - (b - a))(state) == 1);
     }
-    /*
+
     // TODO: implement multiplication and division
     SUBCASE("Evaluation of multiplication and division")
     {
@@ -69,7 +70,6 @@ TEST_CASE("Calculate expressions lazily")
         CHECK((a + a * b)(state) == 8);
         CHECK((a - b / a)(state) == 0.5);
     }
-    */
     /*
     // TODO: implement support for constant expressions
     SUBCASE("Constant expressions")

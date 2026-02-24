@@ -60,7 +60,9 @@ namespace calculator
             minus, ///< unary minus, like -v
             add,   ///< binary addition, like v+v
             sub,   ///< binary addition, like v-v
-            assign ///< assignment, like v <<= v
+            assign, ///< assignment, like v <<= v
+            mult, ///< binary multiplication, like v * v
+            div ///< binary division, like v / v
         } op;
         expr_t(const expr_t& other) { *this = other; }
         expr_t& operator=(const expr_t& other) {
@@ -124,6 +126,23 @@ namespace calculator
                         auto &e2 = *operands[1];
                         return e1(s) - e2(s);
                     }
+                    case expr_t::mult: {
+                            if (operands.size() != 2)
+                                throw std::logic_error{"bug: expecting two operands for binary -"};
+                            auto &e2 = *operands[1];
+                            return e1(s) * e2(s);
+                    }
+                    case expr_t::div: {
+                            if (operands.size() != 2)
+                                throw std::logic_error{"bug: expecting two operands for binary -"};
+                            auto &e2 = *operands[1];
+                            // Check if the expression evaluates to 0
+                            if (e2(s) == 0)
+                            {
+                                throw std::logic_error{"division by zero"};
+                            }
+                            return e1(s) / e2(s);
+                    }
                     default:
                         throw std::logic_error{"not implemented"};
                 }
@@ -144,6 +163,9 @@ namespace calculator
     inline expr_t operator<<=(const var_t& v, const expr_t& e) { return expr_t{v, e}; }
 
     /// TODO: implement multiplication
+    inline expr_t operator*(const expr_t& e1, const expr_t& e2) { return expr_t{e1,e2, expr_t::mult}; }
+    inline expr_t operator/(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, expr_t::div}; }
+
     /// TODO: refactor expr_t into AST terms
     /// TODO: add support for constant expressions like: 7
     /// TODO: add support for printing
