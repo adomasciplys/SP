@@ -142,7 +142,27 @@ namespace calculator
                 throw std::logic_error{"missing variable"};
             if (!term)
                 throw std::logic_error{"missing term"};
-            return s[var->id] = term->operator()(s);
+
+            const double rhs = term->operator()(s);
+            double& lhs = s[var->id];
+
+            switch (op)
+            {
+            case op_t::assign:
+                return lhs = rhs;
+            case op_t::add:
+                return lhs = lhs + rhs;
+            case op_t::sub:
+                return lhs = lhs - rhs;
+            case op_t::mult:
+                return lhs = lhs * rhs;
+            case op_t::div:
+                if (rhs == 0.0)
+                    throw std::logic_error{"division by zero"};
+                return lhs = lhs / rhs;
+            default:
+                throw std::logic_error{"unsupported assignment operation"};
+            }
 
         }
     private:
@@ -193,6 +213,10 @@ namespace calculator
         expr_t(const var_t& v, const expr_t& e)
             : term{std::make_shared<assign_t>(std::make_shared<var_t>(v), e.term, op_t::assign)} {}
 
+        // Constructor for assignment operations with a specific operator
+        expr_t(const var_t& v, const expr_t& e, op_t op)
+            : term{std::make_shared<assign_t>(std::make_shared<var_t>(v), e.term, op)} {}
+
         double operator()(state_t& s) const {
             if (!term)
                 throw std::logic_error{"missing term"};
@@ -208,6 +232,10 @@ namespace calculator
         friend expr_t operator*(const expr_t&, const expr_t&);
         friend expr_t operator/(const expr_t&, const expr_t&);
         friend expr_t operator<<=(const var_t&, const expr_t&);
+        friend expr_t operator+=(const var_t&, const expr_t&);
+        friend expr_t operator-=(const var_t&, const expr_t&);
+        friend expr_t operator*=(const var_t&, const expr_t&);
+        friend expr_t operator/=(const var_t&, const expr_t&);
     };
 
 
@@ -223,6 +251,11 @@ namespace calculator
     inline expr_t operator+(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, op_t::add}; }
     inline expr_t operator-(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, op_t::sub}; }
     inline expr_t operator<<=(const var_t& v, const expr_t& e) { return expr_t{v, e}; }
+
+    inline expr_t operator+=(const var_t& v, const expr_t& e) { return expr_t{v, e, op_t::add}; }
+    inline expr_t operator-=(const var_t& v, const expr_t& e) { return expr_t{v, e, op_t::sub}; }
+    inline expr_t operator*=(const var_t& v, const expr_t& e) { return expr_t{v, e, op_t::mult}; }
+    inline expr_t operator/=(const var_t& v, const expr_t& e) { return expr_t{v, e, op_t::div}; }
 
     /// TODO: implement multiplication
     inline expr_t operator*(const expr_t& e1, const expr_t& e2) { return expr_t{e1,e2, op_t::mult}; }
