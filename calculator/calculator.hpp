@@ -47,12 +47,12 @@ namespace calculator
 
     struct Visitor
     {
-        virtual void visit(const expr_t&);
-        virtual void visit(const var_t&);
-        virtual void visit(const const_t&);
-        virtual void visit(const unary_t&);
-        virtual void visit(const binary_t&);
-        virtual void visit(const assign_t&);
+        virtual void visit(const expr_t&) = 0;
+        virtual void visit(const var_t&) = 0;
+        virtual void visit(const const_t&) = 0;
+        virtual void visit(const unary_t&) = 0;
+        virtual void visit(const binary_t&) = 0;
+        virtual void visit(const assign_t&) = 0;
         virtual ~Visitor() noexcept = default;
 
     };
@@ -252,6 +252,8 @@ namespace calculator
      */
     struct expr_t
     {
+        std::shared_ptr<term_t> term;
+        friend struct Printer;
         // If we get a term we simply move
         expr_t(std::shared_ptr<term_t> term) : term{std::move(term)}
         {
@@ -297,10 +299,6 @@ namespace calculator
                 throw std::logic_error{"missing term"};
             return term->operator()(s);
         }
-
-    private:
-        std::shared_ptr<term_t> term;
-        friend struct Printer;
     };
 
 
