@@ -17,66 +17,92 @@ namespace calculator
 
     /** Forward declarations to get around circular dependencies: */
     struct expr_t;
-    struct var_t;
+    class var_t;
 
     /** Enum representing the operations we can do */
 
-    enum op_t {///< operator sign for assignment/unary/binary expression
-        plus,  ///< unary plus, like +v
+    enum op_t
+    {
+        ///< operator sign for assignment/unary/binary expression
+        plus, ///< unary plus, like +v
         minus, ///< unary minus, like -v
-        add,   ///< binary addition, like v+v
-        sub,   ///< binary addition, like v-v
+        add, ///< binary addition, like v+v
+        sub, ///< binary addition, like v-v
         assign, ///< assignment, like v <<= v
         mult, ///< binary multiplication, like v * v
         div ///< binary division, like v / v
     };
 
+    /** Small helper to check for division by 0 */
+    inline double safe_divide(const double a, const double b) {
+        if (b == 0.0)
+            throw std::logic_error{"division by zero"};
+        return a / b;
+    }
+
     /** Abstract class as a general interface to all kinds of expressions */
+
     struct term_t
     {
+        // Ensure proper cleanup of deriving classes
         virtual ~term_t() noexcept = default;
+        // All deriving classes must implement the operator method
         virtual double operator()(state_t&) const = 0;
     };
 
-    /** Class representing a constant value expression */
-    struct const_t : term_t
+    /** Struct representing a constant value expression */
+
+    struct const_t : term_t // Inherit from term_t
     {
-        double operator()(state_t&) const {return value;}
-        const_t(double value): value{value} {}
-        private:
-            double value;
+        // Simply returns the value it stores
+        double operator()(state_t&) const override { return value; }
+
+        const_t(double value) : value{value}
+        {
+        }
+
+    private:
+        double value;
     };
 
-    /** Class representing unary expressions */
-    struct unary_t : term_t
+    /** Struct representing unary expressions */
+    struct unary_t : term_t // Inherit from term_t
     {
-        unary_t(std::shared_ptr<term_t> operand, const op_t op) : operand{std::move(operand)}, op{op} {}
+        unary_t(std::shared_ptr<term_t> operand, const op_t op) : operand{std::move(operand)}, op{op}
+        {
+        }
 
+        // Return value of term with operator applied to it
         double operator()(state_t& s) const override
         {
             if (!operand)
                 throw std::logic_error{"missing operand for unary operation"};
 
-            switch(op) {
-            case op_t::plus:
-                return operand->operator()(s);
-            case op_t::minus:
-                return -operand->operator()(s);
+            // Select based on operator
+            switch (op)
+            {
+            case plus:
+                return operand->operator()(s); // Evaluate expression unchanged
+            case minus:
+                return -operand->operator()(s); // Evaluate expression and negate
             default:
                 throw std::logic_error{"unsupported unary operation"};
             }
         }
 
-        private:
-            std::shared_ptr<term_t> operand;
-            op_t op;
+    private:
+        std::shared_ptr<term_t> operand;
+        op_t op;
     };
 
     /** Struct representing binary expressions */
+
     struct binary_t : term_t
     {
         binary_t(std::shared_ptr<term_t> term1, std::shared_ptr<term_t> term2, const op_t op)
-            : term1{std::move(term1)}, term2{std::move(term2)}, op{op} {}
+            : term1{std::move(term1)}, term2{std::move(term2)}, op{op}
+        {
+        }
 
         double operator()(state_t& s) const override
         {
@@ -85,40 +111,41 @@ namespace calculator
             if (!term2)
                 throw std::logic_error{"missing term 2"};
 
-            double val1 = term1->operator()(s);
-            double val2 = term2->operator()(s);
+            double val1 = term1->operator()(s); // Evaluate first term
+            double val2 = term2->operator()(s); // Evaluate second term
 
-            switch(op)
+            switch (op)
             {
-            case op_t::add:
+            case add:
                 return val1 + val2;
-            case op_t::sub:
+            case sub:
                 return val1 - val2;
-            case op_t::mult:
+            case mult:
                 return val1 * val2;
-            case op_t::div:
-                if (val2 == 0.0)
-                    throw std::logic_error{"division by zero"};
-                return val1 / val2;
+            case div:
+                return safe_divide(val1, val2);
             default:
                 throw std::logic_error{"unsupported binary operation"};
             }
-
         }
 
-        private:
-            std::shared_ptr<term_t> term1, term2;
-            op_t op;
-
+    private:
+        std::shared_ptr<term_t> term1, term2;
+        op_t op;
     };
 
 
     /** Class representing a variable */
+
+    // Since var_t is a class I need to use public
     class var_t : public term_t
     {
         size_t id; ///< stores the variable identifier
         /** only friends are allowed to construct variable instances */
-        explicit var_t(size_t id): id{id} {}
+        explicit var_t(size_t id) : id{id}
+        {
+        }
+
     public:
         var_t(const var_t&) = default;
         var_t& operator=(const var_t&) = default;
@@ -130,11 +157,14 @@ namespace calculator
         friend struct assign_t;
     };
 
-    /** Class representing assignments */
+    /** Struct representing assignments */
+
     struct assign_t : term_t
     {
         assign_t(std::shared_ptr<var_t> var, std::shared_ptr<term_t> val, const op_t op)
-            : var{std::move(var)}, term{std::move(val)}, op{op} {}
+            : var{std::move(var)}, term{std::move(val)}, op{op}
+        {
+        }
 
         double operator()(state_t& s) const override
         {
@@ -143,81 +173,99 @@ namespace calculator
             if (!term)
                 throw std::logic_error{"missing term"};
 
-            const double rhs = term->operator()(s);
+            const double rhs = term->operator()(s); // Evaluate rhs
+            // Get a reference to var in state where we want to store the new value
             double& lhs = s[var->id];
 
             switch (op)
             {
-            case op_t::assign:
+            case assign:
                 return lhs = rhs;
-            case op_t::add:
-                return lhs = lhs + rhs;
-            case op_t::sub:
-                return lhs = lhs - rhs;
-            case op_t::mult:
-                return lhs = lhs * rhs;
-            case op_t::div:
-                if (rhs == 0.0)
-                    throw std::logic_error{"division by zero"};
-                return lhs = lhs / rhs;
+            case add:
+                return lhs = lhs + rhs; // +=
+            case sub:
+                return lhs = lhs - rhs; // -=
+            case mult:
+                return lhs = lhs * rhs; // *=
+            case div:
+                return lhs = safe_divide(lhs, rhs); // /=
             default:
                 throw std::logic_error{"unsupported assignment operation"};
             }
-
         }
+
     private:
         std::shared_ptr<var_t> var;
         std::shared_ptr<term_t> term;
         op_t op;
     };
 
+    /** Symbol table - UNMODIFIED */
+
     class symbol_table_t
     {
         std::vector<std::string> names; ///< stores the variable names
-        std::vector<double> initial;    ///< stores the initial values of variables
+        std::vector<double> initial; ///< stores the initial values of variables
     public:
         /// Creates a variable with given name and initial value
-        [[nodiscard]] var_t var(std::string name, double init = 0) {
+        [[nodiscard]] var_t var(std::string name, double init = 0)
+        {
             auto res = names.size();
             names.push_back(std::move(name));
             initial.push_back(init);
             return var_t{res};
         }
+
         /// Creates a system state initialized with initial variable values
         [[nodiscard]] state_t state() const { return {initial}; }
     };
 
     /**
      * expr_t represents an expression and implements all operations.
-     * TODO: such design does not scale and has to be refactored into distinct AST classes.
      */
     struct expr_t
     {
-        expr_t(std::shared_ptr<term_t> term) : term{std::move(term)} {}
+        // If we get a term we simply move
+        expr_t(std::shared_ptr<term_t> term) : term{std::move(term)}
+        {
+        }
 
         // Implicit conversion from var_t
-        expr_t(const var_t& v) : term{std::make_shared<var_t>(v)} {}
+        expr_t(const var_t& v) : term{std::make_shared<var_t>(v)}
+        {
+        }
 
         // Implicit conversion from double
-        expr_t(double value) : term{std::make_shared<const_t>(value)} {}
+        expr_t(double value) : term{std::make_shared<const_t>(value)}
+        {
+        }
 
         // Constructor for unary operations
         expr_t(const expr_t& e, op_t op)
-            : term{std::make_shared<unary_t>(e.term, op)} {}
+            : term{std::make_shared<unary_t>(e.term, op)}
+        {
+        }
 
         // Constructor for binary operations
         expr_t(const expr_t& e1, const expr_t& e2, op_t op)
-            : term{std::make_shared<binary_t>(e1.term, e2.term, op)} {}
+            : term{std::make_shared<binary_t>(e1.term, e2.term, op)}
+        {
+        }
 
         // Constructor for assignment operations
         expr_t(const var_t& v, const expr_t& e)
-            : term{std::make_shared<assign_t>(std::make_shared<var_t>(v), e.term, op_t::assign)} {}
+            : term{std::make_shared<assign_t>(std::make_shared<var_t>(v), e.term, op_t::assign)}
+        {
+        }
 
         // Constructor for assignment operations with a specific operator
         expr_t(const var_t& v, const expr_t& e, op_t op)
-            : term{std::make_shared<assign_t>(std::make_shared<var_t>(v), e.term, op)} {}
+            : term{std::make_shared<assign_t>(std::make_shared<var_t>(v), e.term, op)}
+        {
+        }
 
-        double operator()(state_t& s) const {
+        double operator()(state_t& s) const
+        {
             if (!term)
                 throw std::logic_error{"missing term"};
             return term->operator()(s);
@@ -225,19 +273,7 @@ namespace calculator
 
     private:
         std::shared_ptr<term_t> term;
-        friend expr_t operator+(const expr_t&);
-        friend expr_t operator-(const expr_t&);
-        friend expr_t operator+(const expr_t&, const expr_t&);
-        friend expr_t operator-(const expr_t&, const expr_t&);
-        friend expr_t operator*(const expr_t&, const expr_t&);
-        friend expr_t operator/(const expr_t&, const expr_t&);
-        friend expr_t operator<<=(const var_t&, const expr_t&);
-        friend expr_t operator+=(const var_t&, const expr_t&);
-        friend expr_t operator-=(const var_t&, const expr_t&);
-        friend expr_t operator*=(const var_t&, const expr_t&);
-        friend expr_t operator/=(const var_t&, const expr_t&);
     };
-
 
 
     /** assignment operation */
@@ -257,12 +293,9 @@ namespace calculator
     inline expr_t operator*=(const var_t& v, const expr_t& e) { return expr_t{v, e, op_t::mult}; }
     inline expr_t operator/=(const var_t& v, const expr_t& e) { return expr_t{v, e, op_t::div}; }
 
-    /// TODO: implement multiplication
-    inline expr_t operator*(const expr_t& e1, const expr_t& e2) { return expr_t{e1,e2, op_t::mult}; }
+    inline expr_t operator*(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, op_t::mult}; }
     inline expr_t operator/(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, op_t::div}; }
 
-    /// TODO: refactor expr_t into AST terms
-    /// TODO: add support for constant expressions like: 7
     /// TODO: add support for printing
 }
 
