@@ -18,6 +18,11 @@ namespace calculator
     /** Forward declarations to get around circular dependencies: */
     struct expr_t;
     class var_t;
+    struct term_t;
+    struct const_t;
+    struct unary_t;
+    struct binary_t;
+    struct assign_t;
 
     /** Enum representing the operations we can do */
 
@@ -40,6 +45,18 @@ namespace calculator
         return a / b;
     }
 
+    struct Visitor
+    {
+        virtual void visit(expr_t&);
+        virtual void visit(var_t&);
+        virtual void visit(const_t&);
+        virtual void visit(unary_t&);
+        virtual void visit(binary_t&);
+        virtual void visit(assign_t&);
+        virtual ~Visitor() noexcept = default;
+
+    };
+
     /** Abstract class as a general interface to all kinds of expressions */
 
     struct term_t
@@ -48,6 +65,7 @@ namespace calculator
         virtual ~term_t() noexcept = default;
         // All deriving classes must implement the operator method
         virtual double operator()(state_t&) const = 0;
+        virtual void accept(Visitor& v) = 0;
     };
 
     /** Struct representing a constant value expression */
@@ -56,7 +74,7 @@ namespace calculator
     {
         // Simply returns the value it stores
         double operator()(state_t&) const override { return value; }
-
+        void accept(Visitor& v) override { v.visit(*this); }
         const_t(double value) : value{value}
         {
         }
@@ -71,7 +89,6 @@ namespace calculator
         unary_t(std::shared_ptr<term_t> operand, const op_t op) : operand{std::move(operand)}, op{op}
         {
         }
-
         // Return value of term with operator applied to it
         double operator()(state_t& s) const override
         {
@@ -89,6 +106,7 @@ namespace calculator
                 throw std::logic_error{"unsupported unary operation"};
             }
         }
+        void accept(Visitor& v) override { v.visit(*this); }
 
     private:
         std::shared_ptr<term_t> operand;
@@ -128,6 +146,7 @@ namespace calculator
                 throw std::logic_error{"unsupported binary operation"};
             }
         }
+        void accept(Visitor& v) override { v.visit(*this); }
 
     private:
         std::shared_ptr<term_t> term1, term2;
@@ -155,6 +174,7 @@ namespace calculator
         double operator()(state_t&, const expr_t&) const;
         friend class symbol_table_t;
         friend struct assign_t;
+        void accept(Visitor& v) override { v.visit(*this); }
     };
 
     /** Struct representing assignments */
@@ -193,6 +213,7 @@ namespace calculator
                 throw std::logic_error{"unsupported assignment operation"};
             }
         }
+        void accept(Visitor& v) override { v.visit(*this); }
 
     private:
         std::shared_ptr<var_t> var;
