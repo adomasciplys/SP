@@ -47,12 +47,12 @@ namespace calculator
 
     struct Visitor
     {
-        virtual void visit(expr_t&);
-        virtual void visit(var_t&);
-        virtual void visit(const_t&);
-        virtual void visit(unary_t&);
-        virtual void visit(binary_t&);
-        virtual void visit(assign_t&);
+        virtual void visit(const expr_t&);
+        virtual void visit(const var_t&);
+        virtual void visit(const const_t&);
+        virtual void visit(const unary_t&);
+        virtual void visit(const binary_t&);
+        virtual void visit(const assign_t&);
         virtual ~Visitor() noexcept = default;
 
     };
@@ -65,7 +65,7 @@ namespace calculator
         virtual ~term_t() noexcept = default;
         // All deriving classes must implement the operator method
         virtual double operator()(state_t&) const = 0;
-        virtual void accept(Visitor& v) = 0;
+        virtual void accept(Visitor& v) const = 0;
     };
 
     /** Struct representing a constant value expression */
@@ -74,13 +74,14 @@ namespace calculator
     {
         // Simply returns the value it stores
         double operator()(state_t&) const override { return value; }
-        void accept(Visitor& v) override { v.visit(*this); }
+        void accept(Visitor& v) const override { v.visit(*this); }
         const_t(double value) : value{value}
         {
         }
 
     private:
         double value;
+        friend struct Printer;
     };
 
     /** Struct representing unary expressions */
@@ -106,11 +107,12 @@ namespace calculator
                 throw std::logic_error{"unsupported unary operation"};
             }
         }
-        void accept(Visitor& v) override { v.visit(*this); }
+        void accept(Visitor& v) const override { v.visit(*this); }
 
     private:
         std::shared_ptr<term_t> operand;
         op_t op;
+        friend struct Printer;
     };
 
     /** Struct representing binary expressions */
@@ -146,11 +148,12 @@ namespace calculator
                 throw std::logic_error{"unsupported binary operation"};
             }
         }
-        void accept(Visitor& v) override { v.visit(*this); }
+        void accept(Visitor& v) const override { v.visit(*this); }
 
     private:
         std::shared_ptr<term_t> term1, term2;
         op_t op;
+        friend struct Printer;
     };
 
 
@@ -174,7 +177,8 @@ namespace calculator
         double operator()(state_t&, const expr_t&) const;
         friend class symbol_table_t;
         friend struct assign_t;
-        void accept(Visitor& v) override { v.visit(*this); }
+        void accept(Visitor& v) const override { v.visit(*this); }
+        friend struct Printer;
     };
 
     /** Struct representing assignments */
@@ -213,12 +217,13 @@ namespace calculator
                 throw std::logic_error{"unsupported assignment operation"};
             }
         }
-        void accept(Visitor& v) override { v.visit(*this); }
+        void accept(Visitor& v) const override { v.visit(*this); }
 
     private:
         std::shared_ptr<var_t> var;
         std::shared_ptr<term_t> term;
         op_t op;
+        friend struct Printer;
     };
 
     /** Symbol table - UNMODIFIED */
@@ -227,6 +232,7 @@ namespace calculator
     {
         std::vector<std::string> names; ///< stores the variable names
         std::vector<double> initial; ///< stores the initial values of variables
+        friend struct Printer;
     public:
         /// Creates a variable with given name and initial value
         [[nodiscard]] var_t var(std::string name, double init = 0)
@@ -294,6 +300,7 @@ namespace calculator
 
     private:
         std::shared_ptr<term_t> term;
+        friend struct Printer;
     };
 
 
@@ -317,7 +324,77 @@ namespace calculator
     inline expr_t operator*(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, op_t::mult}; }
     inline expr_t operator/(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, op_t::div}; }
 
-    /// TODO: add support for printing
+    struct Printer : Visitor
+    {
+        std::ostream& os;
+        const symbol_table_t& symbols;
+
+        Printer(std::ostream& os, const symbol_table_t& symbols)
+            : os{os}, symbols{symbols} {}
+
+        void visit(const const_t& c) override {
+            os << c.value;
+        }
+
+        void visit(const var_t& v) override {
+            os << symbols.names[v.id];
+        }
+
+        void visit(const unary_t& u) override {
+            if (u.op == op_t::minus) {
+                os << "-";
+            } else if (u.op == op_t::plus) {
+                os << "+";
+            }
+            u.operand->accept(*this);
+        }
+
+        void visit(const binary_t& b) override {
+            os << "(";
+            b.term1->accept(*this);
+            switch (b.op) {
+            case op_t::add: os << " + "; break;
+            case op_t::sub: os << " - "; break;
+            case op_t::mult: os << " * "; break;
+            case op_t::div: os << " / "; break;
+            default: break;
+            }
+            b.term2->accept(*this);
+            os << ")";
+        }
+
+        void visit(const assign_t& a) override {
+            a.var->accept(*this);
+            switch (a.op) {
+            case op_t::assign: os << " <<= "; break;
+            case op_t::add: os << " += "; break;
+            case op_t::sub: os << " -= "; break;
+            case op_t::mult: os << " *= "; break;
+            case op_t::div: os << " /= "; break;
+            default: break;
+            }
+            a.term->accept(*this);
+        }
+
+        void visit(const expr_t& e) override {
+            e.term->accept(*this);
+        }
+    };
+
+    struct PrintTerm {
+        const term_t& term;
+        const symbol_table_t& symbols;
+    };
+
+    inline std::ostream& operator<<(std::ostream& os, const PrintTerm& pt) {
+        Printer printer{os, pt.symbols};
+        pt.term.accept(printer);
+        return os;
+    }
+
+
 }
+
+
 
 #endif // INCLUDE_ALGEBRA_HPP
