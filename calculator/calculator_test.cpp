@@ -9,7 +9,7 @@ TEST_CASE("Calculate expressions lazily")
     auto sys = calculator::symbol_table_t{}; // create a symbol table for variables
     auto a = sys.var("a", 2); // create a variable with name "a" and initial value of 2
     auto b = sys.var("b", 3); // create a variable with name "b" and initial value of 3
-    auto c = sys.var("c");    // create a variable with name "c" and default-initialize with 0
+    auto c = sys.var("c"); // create a variable with name "c" and default-initialize with 0
     auto state = sys.state(); // create a system state initialized with variable initial values
     auto os = std::ostringstream(); // string stream to output to
 
@@ -91,5 +91,32 @@ TEST_CASE("Calculate expressions lazily")
         CHECK(expr(state) == 0);
         CHECK(c_4(state) == 4);
         CHECK(expr(state) == 20);
+    }
+
+    SUBCASE("Printing expressions with visitor pattern")
+    {
+        auto expr1 = a + b;
+        os << calculator::PrintTerm{*expr1.term, sys};
+        CHECK(os.str() == "(a + b)");
+
+        os.str("");
+        auto expr2 = -c;
+        os << calculator::PrintTerm{*expr2.term, sys};
+        CHECK(os.str() == "-c");
+
+        os.str("");
+        auto expr3 = a * b - c;
+        os << calculator::PrintTerm{*expr3.term, sys};
+        CHECK(os.str() == "((a * b) - c)");
+
+        os.str("");
+        auto expr4 = c <<= a + b;
+        os << calculator::PrintTerm{*expr4.term, sys};
+        CHECK(os.str() == "c <<= (a + b)");
+
+        os.str("");
+        auto expr5 = 7 + a;
+        os << calculator::PrintTerm{*expr5.term, sys};
+        CHECK(os.str() == "(7 + a)");
     }
 }
