@@ -18,7 +18,7 @@ namespace calculator
 
     void Evaluator::visit(const const_t& c)
     {
-        _result = c.value;
+        _result = c.value();
     }
 
     void Evaluator::visit(const var_t& v)
@@ -28,17 +28,17 @@ namespace calculator
 
     void Evaluator::visit(const unary_t& u)
     {
-        if (!u.operand)
+        if (! u.operand())
             throw std::logic_error{"missing operand for unary operation"};
 
         // Select based on operator
-        switch (u.op)
+        switch (u.op())
         {
         case plus:
-            u.operand->accept(*this);
+            u.operand()->accept(*this);
             break;
         case minus:
-            u.operand->accept(*this);
+            u.operand()->accept(*this);
             _result = -_result;
             break;
         default:
@@ -48,17 +48,17 @@ namespace calculator
 
     void Evaluator::visit(const binary_t& b)
     {
-        if (!b.term1)
+        if (!b.term1())
             throw std::logic_error{"missing term 1"};
-        if (!b.term2)
+        if (!b.term2())
             throw std::logic_error{"missing term 2"};
 
-        b.term1->accept(*this); // Evaluate first term
+        b.term1()->accept(*this); // Evaluate first term
         double val1 = _result;
-        b.term2->accept(*this); // Evaluate second term
+        b.term2()->accept(*this); // Evaluate second term
         double val2 = _result;
 
-        switch (b.op)
+        switch (b.op())
         {
         case add:
             _result = val1 + val2;
@@ -79,18 +79,18 @@ namespace calculator
 
     void Evaluator::visit(const assign_t& a)
     {
-        if (!a.var)
+        if (!a.var())
             throw std::logic_error{"missing variable"};
-        if (!a.term)
+        if (!a.term())
             throw std::logic_error{"missing term"};
 
-        a.term->accept(*this); // Evaluate rhs
+        a.term()->accept(*this); // Evaluate rhs
         const double rhs = _result;
 
         // Get a reference to var in state where we want to store the new value
-        double& lhs = _state[a.var->id()];
+        double& lhs = _state[a.var()->id()];
 
-        switch (a.op)
+        switch (a.op())
         {
         case assign:
             lhs = rhs;

@@ -9,10 +9,16 @@ namespace calculator
     /** Struct representing a constant value expression */
     struct const_t : term_t
     {
+        // Simply returns the value it stores
         void accept(Visitor& v) const override;
         const_t(double value);
-        const double value;
+        double value() const;
+
+    private:
+        double _value;
+        friend struct Printer;
     };
 }
 
 #endif // CALCULATOR_CONST_HPP
+

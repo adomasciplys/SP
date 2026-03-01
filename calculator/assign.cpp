@@ -4,9 +4,25 @@
 namespace calculator
 {
     assign_t::assign_t(std::shared_ptr<var_t> var, std::shared_ptr<term_t> val, const op_t op)
-        : var{std::move(var)}, term{std::move(val)}, op{op}
+        : _var{std::move(var)}, _term{std::move(val)}, _op{op}
     {
+    }
+
+    std::shared_ptr<var_t> assign_t::var() const
+    {
+        return _var;
+    }
+
+    std::shared_ptr<term_t> assign_t::term() const
+    {
+        return _term;
+    }
+
+    op_t assign_t::op() const
+    {
+        return _op;
     }
 
     void assign_t::accept(Visitor& v) const { v.visit(*this); }
 }
+
