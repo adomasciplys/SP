@@ -4,22 +4,37 @@
 namespace calculator
 {
     assign_t::assign_t(std::shared_ptr<var_t> var, std::shared_ptr<term_t> val, const op_t op)
-        : var{std::move(var)}, term{std::move(val)}, op{op}
+        : _var{std::move(var)}, _term{std::move(val)}, _op{op}
     {
+    }
+
+    std::shared_ptr<var_t> assign_t::var() const
+    {
+        return _var;
+    }
+
+    std::shared_ptr<term_t> assign_t::term() const
+    {
+        return _term;
+    }
+
+    op_t assign_t::op() const
+    {
+        return _op;
     }
 
     double assign_t::operator()(state_t& s) const
     {
-        if (!var)
+        if (!_var)
             throw std::logic_error{"missing variable"};
-        if (!term)
+        if (!_term)
             throw std::logic_error{"missing term"};
 
-        const double rhs = term->operator()(s); // Evaluate rhs
+        const double rhs = _term->operator()(s); // Evaluate rhs
         // Get a reference to var in state where we want to store the new value
-        double& lhs = s[var->id];
+        double& lhs = s[_var->_id];
 
-        switch (op)
+        switch (_op)
         {
         case assign:
             return lhs = rhs;

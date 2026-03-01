@@ -15,10 +15,12 @@ namespace calculator
         double operator()(state_t& s) const override;
         void accept(Visitor& v) const override;
         unary_t(std::shared_ptr<term_t> operand, const op_t op);
+        std::shared_ptr<term_t> operand() const;
+        op_t op() const;
 
     private:
-        std::shared_ptr<term_t> operand;
-        op_t op;
+        std::shared_ptr<term_t> _operand;
+        op_t _op;
         friend struct Printer;
     };
 }
