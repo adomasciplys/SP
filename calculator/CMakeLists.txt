@@ -20,6 +20,7 @@ add_executable(calculator_test
     var.cpp
     assign.cpp
     expr.cpp
+    term.cpp
     symbol_table.cpp
     printer.cpp
     evaluator.cpp

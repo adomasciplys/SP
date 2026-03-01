@@ -30,6 +30,10 @@
 4) Can we change `unique_ptr` into `shared_ptr` or vice-a-versa? why?
 5) Which definitions can we safely hide into separate **cpp** file without disturbing the test cases? 
 6) Did you like unit testing? Would you use it in your future projects?
+7) Compare the previous design with the visitor design: What are advantages and disadvantages? 
+8) Think about usability and readability: which design is easier to use? 
+9) How does your test code look? Did you have to change it? Is it intuitive how to use it? 
+10) Think about writability and maintainability: which design is easier to extend with new algorithms?
 
 ## Unit Testing
 This exercise introduces [doctest](https://github.com/doctest/doctest) unit testing framework.
