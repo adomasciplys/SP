@@ -16,6 +16,18 @@
 
 namespace calculator
 {
+    inline const var_t& require_assignment_var(const expr_t& lhs)
+    {
+        if (!lhs.term)
+            throw std::logic_error{"assignment destination must be a variable expression"};
+
+        auto var = std::dynamic_pointer_cast<var_t>(lhs.term);
+        if (!var)
+            throw std::logic_error{"assignment destination must be a variable expression"};
+
+        return *var;
+    }
+
     /** assignment operation */
     inline double var_t::operator()(state_t& s, const expr_t& e) const { return s[id()] = e(s); }
 
@@ -27,11 +39,16 @@ namespace calculator
     inline expr_t operator+(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, op_t::add}; }
     inline expr_t operator-(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, op_t::sub}; }
     inline expr_t operator<<=(const var_t& v, const expr_t& e) { return expr_t{v, e}; }
+    inline expr_t operator<<=(const expr_t& lhs, const expr_t& rhs) { return expr_t{require_assignment_var(lhs), rhs}; }
 
     inline expr_t operator+=(const var_t& v, const expr_t& e) { return expr_t{v, e, op_t::add}; }
     inline expr_t operator-=(const var_t& v, const expr_t& e) { return expr_t{v, e, op_t::sub}; }
     inline expr_t operator*=(const var_t& v, const expr_t& e) { return expr_t{v, e, op_t::mult}; }
     inline expr_t operator/=(const var_t& v, const expr_t& e) { return expr_t{v, e, op_t::div}; }
+    inline expr_t operator+=(const expr_t& lhs, const expr_t& rhs) { return expr_t{require_assignment_var(lhs), rhs, op_t::add}; }
+    inline expr_t operator-=(const expr_t& lhs, const expr_t& rhs) { return expr_t{require_assignment_var(lhs), rhs, op_t::sub}; }
+    inline expr_t operator*=(const expr_t& lhs, const expr_t& rhs) { return expr_t{require_assignment_var(lhs), rhs, op_t::mult}; }
+    inline expr_t operator/=(const expr_t& lhs, const expr_t& rhs) { return expr_t{require_assignment_var(lhs), rhs, op_t::div}; }
 
     inline expr_t operator*(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, op_t::mult}; }
     inline expr_t operator/(const expr_t& e1, const expr_t& e2) { return expr_t{e1, e2, op_t::div}; }
