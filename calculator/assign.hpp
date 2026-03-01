@@ -20,7 +20,7 @@ namespace calculator
         op_t op() const;
 
     private:
-        std::shared_ptr<var_t> _var;
+        std::shared_ptr<var_t> _var; // Is there a reason these should be private? I followed the class diagram
         std::shared_ptr<term_t> _term;
         op_t _op;
         friend struct Printer;

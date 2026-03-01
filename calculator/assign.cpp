@@ -10,7 +10,7 @@ namespace calculator
 
     std::shared_ptr<var_t> assign_t::var() const
     {
-        return _var;
+        return _var; // It would just simplify the code if I would not have to write all these getters :D
     }
 
     std::shared_ptr<term_t> assign_t::term() const

@@ -3,7 +3,6 @@
 #include "unary.hpp"
 #include "binary.hpp"
 #include "assign.hpp"
-#include "evaluator.hpp"
 
 namespace calculator
 {
@@ -47,9 +46,8 @@ namespace calculator
     }
 
     double expr_t::operator()(state_t& s) const {
-        Evaluator evaluator{0.0, s};
-        term->accept(evaluator);
-        return evaluator.result();
+        if (!term)
+            throw std::logic_error{"missing term"};
+        return (*term)(s);
     }
 }
-

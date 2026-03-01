@@ -13,5 +13,9 @@ namespace calculator
 
     /// Creates a system state initialized with initial variable values
     state_t symbol_table_t::state() const { return {initial}; }
-}
 
+    const std::string& symbol_table_t::name(size_t id) const
+    {
+        return names.at(id);
+    }
+}
