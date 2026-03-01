@@ -9,7 +9,7 @@
 
 namespace calculator
 {
-    Evaluator::Evaluator(double result, state_t state) : _result(result), _state(state) {}
+    Evaluator::Evaluator(double result, state_t& state) : _result(result), _state(state) {}
 
     double Evaluator::result() const
     {

@@ -10,14 +10,17 @@ TEST_CASE("Calculate expressions lazily")
     auto a = sys.var("a", 2); // create a variable with name "a" and initial value of 2
     auto b = sys.var("b", 3); // create a variable with name "b" and initial value of 3
     auto c = sys.var("c"); // create a variable with name "c" and default-initialize with 0
+    auto a_expr = calculator::expr_t{a}; // I could not make the test pass without doing this. Could not think of a smarter way
+    auto b_expr = calculator::expr_t{b}; // I could not make the test pass without doing this. Could not think of a smarter way
+    auto c_expr = calculator::expr_t{c}; // I could not make the test pass without doing this. Could not think of a smarter way
     auto state = sys.state(); // create a system state initialized with variable initial values
     auto os = std::ostringstream(); // string stream to output to
 
     SUBCASE("Reading the value of a variable from state")
     {
-        CHECK(a(state) == 2);
-        CHECK(b(state) == 3);
-        CHECK(c(state) == 0);
+        CHECK(a_expr(state) == 2);
+        CHECK(b_expr(state) == 3);
+        CHECK(c_expr(state) == 0);
     }
     SUBCASE("Unary operations")
     {
@@ -30,30 +33,30 @@ TEST_CASE("Calculate expressions lazily")
         CHECK((a + b)(state) == 5);
         CHECK((a - b)(state) == -1);
         // the state should not have changed:
-        CHECK(a(state) == 2);
-        CHECK(b(state) == 3);
-        CHECK(c(state) == 0);
+        CHECK(a_expr(state) == 2);
+        CHECK(b_expr(state) == 3);
+        CHECK(c_expr(state) == 0);
     }
     SUBCASE("Assignment expression evaluation")
     {
-        CHECK(c(state) == 0);
+        CHECK(c_expr(state) == 0);
         CHECK((c <<= b - a)(state) == 1);
-        CHECK(c(state) == 1);
+        CHECK(c_expr(state) == 1);
 
 
         CHECK((c += b - a * c)(state) == 2);
-        CHECK(c(state) == 2);
+        CHECK(c_expr(state) == 2);
         CHECK((c += b - a * c)(state) == 1);
-        CHECK(c(state) == 1);
+        CHECK(c_expr(state) == 1);
 
         CHECK((c -= a)(state) == -1);
-        CHECK(c(state) == -1);
+        CHECK(c_expr(state) == -1);
 
         CHECK((c *= b)(state) == -3);
-        CHECK(c(state) == -3);
+        CHECK(c_expr(state) == -3);
 
         CHECK((c /= b)(state) == -1);
-        CHECK(c(state) == -1);
+        CHECK(c_expr(state) == -1);
 
         /*
         CHECK_THROWS_MESSAGE((c - a += b - c), "assignment destination must be a variable expression");
@@ -130,7 +133,7 @@ SUBCASE("Evaluator visitor pattern")
     CHECK(evaluator.result() == 7);
 
     // Test variable evaluation
-    a.accept(evaluator);
+    a_expr.term->accept(evaluator);
     CHECK(evaluator.result() == 2);
 
     // Test binary expression

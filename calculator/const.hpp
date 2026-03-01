@@ -10,7 +10,6 @@ namespace calculator
     struct const_t : term_t
     {
         // Simply returns the value it stores
-        double operator()(state_t&) const override;
         void accept(Visitor& v) const override;
         const_t(double value);
         double value() const;

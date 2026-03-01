@@ -8,7 +8,6 @@ namespace calculator
 
     /** returns the value of the variable stored in a state */
     size_t var_t::id() const { return _id; }
-    double var_t::operator()(state_t& s) const { return s[_id]; }
 
     void var_t::accept(Visitor& v) const { v.visit(*this); }
 }

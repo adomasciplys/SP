@@ -16,7 +16,7 @@ namespace calculator
         // Ensure proper cleanup of deriving classes
         virtual ~term_t() noexcept = default;
         // All deriving classes must implement the operator method
-        virtual double operator()(state_t&) const = 0;
+        double operator()(state_t& s) const;
         virtual void accept(Visitor& v) const = 0;
     };
 }

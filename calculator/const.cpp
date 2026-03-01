@@ -6,7 +6,6 @@ namespace calculator
     {
     }
     double const_t::value() const {return _value;}
-    double const_t::operator()(state_t&) const { return _value; }
     void const_t::accept(Visitor& v) const { v.visit(*this); }
 }
 
