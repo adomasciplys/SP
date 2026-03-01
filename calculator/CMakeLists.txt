@@ -22,6 +22,7 @@ add_executable(calculator_test
     expr.cpp
     symbol_table.cpp
     printer.cpp
+    evaluator.cpp
 )
 
 target_link_libraries(calculator_test PRIVATE doctest::doctest_with_main)

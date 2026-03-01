@@ -13,9 +13,10 @@ namespace calculator
         double operator()(state_t&) const override;
         void accept(Visitor& v) const override;
         const_t(double value);
+        double value() const;
 
     private:
-        double value;
+        double _value;
         friend struct Printer;
     };
 }

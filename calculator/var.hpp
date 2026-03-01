@@ -12,7 +12,7 @@ namespace calculator
     // Since var_t is a class I need to use public
     class var_t : public term_t
     {
-        size_t id; ///< stores the variable identifier
+        size_t _id; ///< stores the variable identifier
         /** only friends are allowed to construct variable instances */
         explicit var_t(size_t id);
 
@@ -27,6 +27,7 @@ namespace calculator
         friend struct assign_t;
         void accept(Visitor& v) const override;
         friend struct Printer;
+        size_t id () const;
     };
 }
 

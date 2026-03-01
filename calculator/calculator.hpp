@@ -12,11 +12,12 @@
 #include "expr.hpp"
 #include "symbol_table.hpp"
 #include "printer.hpp"
+#include "evaluator.hpp"
 
 namespace calculator
 {
     /** assignment operation */
-    inline double var_t::operator()(state_t& s, const expr_t& e) const { return s[id] = e(s); }
+    inline double var_t::operator()(state_t& s, const expr_t& e) const { return s[id()] = e(s); }
 
     /** unary operators: */
     inline expr_t operator+(const expr_t& e) { return expr_t{e, op_t::plus}; }

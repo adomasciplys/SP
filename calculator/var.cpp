@@ -2,12 +2,13 @@
 
 namespace calculator
 {
-    var_t::var_t(size_t id) : id{id}
+    var_t::var_t(size_t id) : _id{id}
     {
     }
 
     /** returns the value of the variable stored in a state */
-    double var_t::operator()(state_t& s) const { return s[id]; }
+    size_t var_t::id() const { return _id; }
+    double var_t::operator()(state_t& s) const { return s[_id]; }
 
     void var_t::accept(Visitor& v) const { v.visit(*this); }
 }
