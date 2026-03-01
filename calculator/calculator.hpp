@@ -12,6 +12,7 @@
 #include "expr.hpp"
 #include "symbol_table.hpp"
 #include "printer.hpp"
+#include "evaluator.hpp"
 
 namespace calculator
 {

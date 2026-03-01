@@ -1,5 +1,4 @@
-#ifndef CALCULATOR_PRINTER_HPP
-#define CALCULATOR_PRINTER_HPP
+#pragma once
 
 #include "visitor.hpp"
 #include <memory>
@@ -23,6 +22,7 @@ namespace calculator
         void visit(const unary_t& u) override;
         void visit(const binary_t& b) override;
         void visit(const assign_t& a) override;
+        void visit(const expr_t& e) override;
 
         double result() const;
 
@@ -31,6 +31,4 @@ namespace calculator
             state_t _state;
     };
 }
-
-#endif // CALCULATOR_PRINTER_HPP
 

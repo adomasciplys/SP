@@ -119,4 +119,35 @@ TEST_CASE("Calculate expressions lazily")
         os << calculator::PrintTerm{*expr5.term, sys};
         CHECK(os.str() == "(7 + a)");
     }
+
+SUBCASE("Evaluator visitor pattern")
+{
+    auto evaluator = calculator::Evaluator{0.0, state};
+
+    // Test constant evaluation
+    auto expr1 = calculator::expr_t{7};
+    expr1.term->accept(evaluator);
+    CHECK(evaluator.result() == 7);
+
+    // Test variable evaluation
+    a.accept(evaluator);
+    CHECK(evaluator.result() == 2);
+
+    // Test binary expression
+    auto expr2 = a + b;
+    expr2.term->accept(evaluator);
+    CHECK(evaluator.result() == 5);
+
+    // Test unary expression
+    auto expr3 = -b;
+    expr3.term->accept(evaluator);
+    CHECK(evaluator.result() == -3);
+
+    // Test assignment
+    auto expr4 = c <<= a + b;
+    expr4.term->accept(evaluator);
+    CHECK(evaluator.result() == 5);
+}
+
+
 }
