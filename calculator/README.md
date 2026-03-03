@@ -22,18 +22,40 @@
 ```
 
 ## Questions for Reflections
+- I was a bit pressed on time to hand this in so some of the answers are lacking, but hope the code still makes sense somewhat
 1) Compare the signatures of binary operators in this project with [std::valarray operator overloads](https://en.cppreference.com/w/cpp/numeric/valarray/operator_arith3):
-   do they take arguments by value or by reference? return by value or by reference?
-   Are there a fundamental differences in semantics (meaning/implementation)?
+   do they take arguments by value or by reference? return by value or by reference?  Are there a fundamental differences in semantics (meaning/implementation)?
+- Did not have time to look at this
 2) Did you use inheritance or aggregation or both? where? why?
+- Both are used. 
+- Inheritance: all AST nodes derive from `term_t` (`const_t`, `var_t`, `unary_t`, `binary_t`, `assign_t`). 
+- Aggregation/composition: nodes contain other nodes via pointers (`binary_t` has two subterms, `unary_t` one subterm, `assign_t` a variable and rhs term)
+
 3) Did you use smart pointers? which? where? why?
+- Yes, `std::shared_ptr` is used for AST ownership (`expr_t::term` and child links in AST node types). 
+- It simplifies copying expressions and reusing subexpressions without manual lifetime management.
+
 4) Can we change `unique_ptr` into `shared_ptr` or vice-a-versa? why?
+- I am pretty sure you mentioned that we can go from shared to unique, but I have no idea if it is possible the other way around
 5) Which definitions can we safely hide into separate **cpp** file without disturbing the test cases? 
+- Ehmm.... I moved all classes and struct out of the one file. I do not know if this is correct and what a better structure would be
 6) Did you like unit testing? Would you use it in your future projects?
-7) Compare the previous design with the visitor design: What are advantages and disadvantages? 
-8) Think about usability and readability: which design is easier to use? 
-9) How does your test code look? Did you have to change it? Is it intuitive how to use it? 
+- Yes, we also use unit testing in the projects. It is very nice to comment out one line, make the code work, and then move on to the next
+- That way you work with the code in bite sized pieces :)
+7) Compare the previous design with the visitor design: What are advantages and disadvantages?
+- Visitor design advantages: separates algorithms from data structure, makes it easy to add new operations (e.g., evaluator, printer) without changing AST node data layout. 
+- Disadvantages: adding a new AST node type requires updating `Visitor` and every concrete visitor.
+
+8) Think about usability and readability: which design is easier to use?
+- For me visitor design is more readable when multiple algorithms are needed, because each algorithm stays in one class.
+- However, it requires a ton of boilerplate hell to setup
+- But still less boilerplate than overriding the operator()
+9) How does your test code look? Did you have to change it? Is it intuitive how to use it?
+- I tried to modify it as little as possible, so I knew my implementation would adhere to the design intentions
 10) Think about writability and maintainability: which design is easier to extend with new algorithms?
+- Visitor design is easier to extend with new algorithms cause in the operator() override case the algorithm becomes scattered across all classes
+
+
 
 ## Unit Testing
 This exercise introduces [doctest](https://github.com/doctest/doctest) unit testing framework.
