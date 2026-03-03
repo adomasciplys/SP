@@ -23,6 +23,7 @@
 
 ## Questions for Reflections
 - I was a bit pressed on time to hand this in so some of the answers are lacking, but hope the code still makes sense somewhat
+- Some of the `#includes` might be completely out of this world. I will admit at the end I just needed the project to compile
 1) Compare the signatures of binary operators in this project with [std::valarray operator overloads](https://en.cppreference.com/w/cpp/numeric/valarray/operator_arith3):
    do they take arguments by value or by reference? return by value or by reference?  Are there a fundamental differences in semantics (meaning/implementation)?
 - Did not have time to look at this
