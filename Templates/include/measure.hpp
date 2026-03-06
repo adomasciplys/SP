@@ -2,25 +2,34 @@
 #define TEMPLATES_MEASURE_HPP
 
 #include <chrono>
+#include <functional>
 
-/// Measures the time it takes to call fn with arg. Returns the result with duration.
-/// TODO: Convert this function into a function template, where the fn, arg(s) and return types are
-/// deduced
-/// TODO: Replace the type of fn with deduced type
-/// TODO: Replace the type of arg with deduced type
-/// TODO EXTRA: Extend the function template to arbitrary number of arguments
-inline auto measure(MinMax (&fn)(std::span<const double>), std::span<const double> arg)
+// Template function that accepts
+// - A callable (Fn)
+// - Any number of arguments (... Args)
+template <typename  Fn, typename ... Args>
+inline auto measure(Fn fn, Args&& ... args) // Universal reference
 {
-	// TODO: use std::invoke_result_t to extract the return type of fn (assume non-void type)
 	using Clock	   = std::chrono::high_resolution_clock;
 	using Duration = Clock::duration;
+
+	// Type alias for the return type of invoking Fn with Args
+	using ReturnType = std::invoke_result_t<Fn, Args...>;
+
 	struct Result
 	{
-		MinMax	 ret;  /// TODO: replace MinMax with deduced type
+		ReturnType	 ret;
 		Duration duration;
 	} result;
+
 	const auto t0	= Clock::now();
-	result.ret		= fn(arg);	// TODO: use std::forward to forward the arguments to fn call
+	//std::invoke(fn, std::forward<Args>(args)...):
+	//    - Calls the function fn with all the arguments, preserving their original types (lvalue/rvalue) through perfect forwarding
+
+	// std::forward<Args>(args)...
+	//    - The ... unpacks the argument pack.
+	//    If you passed 3 arguments, this expands to forward all 3 of them in order.
+	result.ret		= std::invoke(fn, std::forward<Args>(args)...);
 	const auto t1	= Clock::now();
 	result.duration = t1 - t0;
 	return result;
