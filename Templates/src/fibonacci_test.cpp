@@ -13,7 +13,6 @@ TEST_CASE("Runtime Fibonacci")
 	REQUIRE(fib(40) == 165580141u);
 }
 
-/** TODO: uncomment and implement compile-time Fibonacci sequence
 TEST_CASE("Compile-time Fibonacci")
 {
 	REQUIRE(Fib<0>::value == 1u);
@@ -24,4 +23,3 @@ TEST_CASE("Compile-time Fibonacci")
 	REQUIRE(Fib<5>::value == 8u);
 	REQUIRE(Fib<40>::value == 165580141u);
 }
-*/
