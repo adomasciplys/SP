@@ -16,13 +16,13 @@ namespace calculator
     }
 
     void Printer::visit(const var_t& v) {
-        os << symbols.names[v.id()];
+        os << symbols.name(v.id());
     }
 
     void Printer::visit(const unary_t& u) {
-        if (u._op == op_t::minus) {
+        if (u.op() == op_t::minus) {
             os << "-";
-        } else if (u._op == op_t::plus) {
+        } else if (u.op() == op_t::plus) {
             os << "+";
         }
         u.operand()->accept(*this);
@@ -65,4 +65,3 @@ namespace calculator
         return os;
     }
 }
-

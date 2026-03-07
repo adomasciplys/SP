@@ -19,9 +19,9 @@ namespace calculator
     public:
         var_t(const var_t&) = default;
         var_t& operator=(const var_t&) = default;
-        /** returns the value of the variable stored in a state */
-        double operator()(state_t& s) const override;
-        /** evaluates an assignment to a given expression and returns the resulting value */
+        // Keep term_t::operator()(state_t&) visible alongside assignment operator().
+        using term_t::operator(); // call the inherited visitor-based evaluator
+        /** evaluates an assignment to a  given expression and returns the resulting value */
         double operator()(state_t&, const expr_t&) const;
         friend class symbol_table_t;
         friend struct assign_t;
@@ -32,4 +32,3 @@ namespace calculator
 }
 
 #endif // CALCULATOR_VAR_HPP
-

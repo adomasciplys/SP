@@ -10,7 +10,7 @@ namespace calculator
 
     std::shared_ptr<var_t> assign_t::var() const
     {
-        return _var;
+        return _var; // It would just simplify the code if I would not have to write all these getters :D
     }
 
     std::shared_ptr<term_t> assign_t::term() const
@@ -21,34 +21,6 @@ namespace calculator
     op_t assign_t::op() const
     {
         return _op;
-    }
-
-    double assign_t::operator()(state_t& s) const
-    {
-        if (!_var)
-            throw std::logic_error{"missing variable"};
-        if (!_term)
-            throw std::logic_error{"missing term"};
-
-        const double rhs = _term->operator()(s); // Evaluate rhs
-        // Get a reference to var in state where we want to store the new value
-        double& lhs = s[_var->_id];
-
-        switch (_op)
-        {
-        case assign:
-            return lhs = rhs;
-        case add:
-            return lhs = lhs + rhs; // +=
-        case sub:
-            return lhs = lhs - rhs; // -=
-        case mult:
-            return lhs = lhs * rhs; // *=
-        case div:
-            return lhs = safe_divide(lhs, rhs); // /=
-        default:
-            throw std::logic_error{"unsupported assignment operation"};
-        }
     }
 
     void assign_t::accept(Visitor& v) const { v.visit(*this); }

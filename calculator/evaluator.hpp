@@ -16,7 +16,7 @@ namespace calculator
 
     struct Evaluator : Visitor
     {
-        Evaluator(double result, state_t state);
+        Evaluator(double result, state_t& state);
         void visit(const const_t& c) override;
         void visit(const var_t& v) override;
         void visit(const unary_t& u) override;
@@ -28,7 +28,7 @@ namespace calculator
 
         private:
             double _result;
-            state_t _state;
+            state_t& _state;
     };
 }
 

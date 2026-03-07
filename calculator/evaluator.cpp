@@ -9,7 +9,7 @@
 
 namespace calculator
 {
-    Evaluator::Evaluator(double result, state_t state) : _result(result), _state(state) {}
+    Evaluator::Evaluator(double result, state_t& state) : _result(result), _state(state) {}
 
     double Evaluator::result() const
     {
@@ -110,6 +110,9 @@ namespace calculator
         default:
             throw std::logic_error{"unsupported assignment operation"};
         }
+
+        // Assignment expressions evaluate to the assigned/updated variable value.
+        _result = lhs;
     }
 
     void Evaluator::visit(const expr_t& e)

@@ -45,11 +45,9 @@ namespace calculator
     {
     }
 
-    double expr_t::operator()(state_t& s) const
-    {
+    double expr_t::operator()(state_t& s) const {
         if (!term)
             throw std::logic_error{"missing term"};
-        return term->operator()(s);
+        return (*term)(s);
     }
 }
-

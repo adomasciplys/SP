@@ -12,7 +12,6 @@ namespace calculator
     struct unary_t : term_t
     {
         // Return value of term with operator applied to it
-        double operator()(state_t& s) const override;
         void accept(Visitor& v) const override;
         unary_t(std::shared_ptr<term_t> operand, const op_t op);
         std::shared_ptr<term_t> operand() const;
