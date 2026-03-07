@@ -29,6 +29,8 @@ add_executable(power_test power_test.cpp)
 target_link_libraries(power_test PRIVATE doctest::doctest_with_main)
 add_test(NAME power_test COMMAND power_test)
 
+add_executable(power_bm power_bm.cpp)
+
 add_executable(type_name_boost type_name_boost.cpp)
 target_link_libraries(type_name_boost PRIVATE doctest::doctest_with_main)
 if(TARGET Boost::type_index)
