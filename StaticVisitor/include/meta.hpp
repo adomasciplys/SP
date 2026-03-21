@@ -7,14 +7,14 @@
 
 template <typename T>
 // remove_cref_t gives the underlying type removing const, volatile and references
-// So, we remove the "wrapper" and then check if it is equal to bool, in all other cases this predicate is false
+// So, we look at the "core" typ  and then check if it is equal to bool, in all other cases this predicate is false
 concept is_bool_v = std::same_as<std::remove_cvref_t<T>, bool>;
 
 template <typename T>
 concept is_number_v = (
     std::integral<std::remove_cvref_t<T>> || // is integer check
     std::floating_point<std::remove_cvref_t<T>>) && // is floating point check
-    !std::same_as<std::remove_cvref_t<T>, bool>; // not a bool check
+    !std::same_as<std::remove_cvref_t<T>, bool>; // not a bool check (we want to treat them separately)
 
 template <typename T>
 concept is_character_v = std::same_as<std::remove_cvref_t<T>, char>;
@@ -35,7 +35,7 @@ template <typename Data, typename Visitor>
 concept accepts_v =
  requires(std::remove_reference_t<Data>& data,
  std::remove_reference_t<Visitor>& visitor) {
-    data.accept(visitor);
+    data.accept(visitor); // Check if you can call data implements accept
  };
 
 template <typename T>

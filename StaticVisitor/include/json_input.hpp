@@ -30,6 +30,15 @@ struct json_reader
     }
 };
 
+template <typename Fn>
+void read_object(json_istream& j, Fn&& fn) {
+    char brace;
+    j.is >> brace; // consume '{'
+    json_reader reader{.in=j};
+    fn(reader);
+    j.is >> brace; // consume '}'
+}
+
 template <std::size_t I = 0, typename Tuple>
 requires(is_std_tuple_v<Tuple>)
 void read_tuple(json_reader& reader, Tuple& t) {
@@ -85,18 +94,10 @@ json_istream& operator>>(json_istream& j, T& v)
         }
     }
     else if constexpr (accepts_v<T, json_reader>) {
-        char brace;
-        j.is >> brace; // consume '{'
-        json_reader reader {.in=j};
-        v.accept(reader);
-        j.is >> brace; // consume '}'
+        read_object(j, [&](json_reader& r) { v.accept(r); });
     }
     else if constexpr (is_std_tuple_v<T>) {
-        char brace;
-        j.is >> brace; // consume '{'
-        json_reader reader{.in=j};
-        read_tuple(reader, v);
-        j.is >> brace; // consume '}'
+        read_object(j, [&](json_reader& r) { read_tuple(r, v); });
     }
 
     return j;

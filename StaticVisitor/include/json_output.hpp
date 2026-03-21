@@ -31,6 +31,27 @@ struct json_writer
     };
 };
 
+/** Helper to write container elements with comma separators (for arrays and object values) */
+template <typename Range, typename Fn>
+void write_items(json_ostream& j, const Range& range, Fn&& fn) {
+    bool first = true;
+    for (const auto& item : range) {
+        if (!first) j.os << ',';
+        first = false;
+        fn(item);
+    }
+}
+
+/** Helper to write JSON objects with field visitors (wraps fields in {} and manages json_writer) */
+template <typename Fn>
+void write_object(json_ostream& j, Fn&& fn) {
+    j.os << '{';
+    json_writer writer{.out=j};
+    fn(writer);
+    j.os << '}';
+}
+
+/** Recursively write tuple elements using visitor pattern (converts tuple indices to field names "0", "1", "2", etc.) */
 template <std::size_t I = 0, typename Tuple>
 requires(is_std_tuple_v<Tuple>)
 void write_tuple(json_writer& writer, const Tuple& t) {
@@ -40,6 +61,7 @@ void write_tuple(json_writer& writer, const Tuple& t) {
     }
 }
 
+/** Main JSON serialization operator. Dispatches based on type using compile-time checks (if constexpr) */
 template <typename T>
 json_ostream& operator<<(json_ostream& j, const T& v)
 {
@@ -54,41 +76,23 @@ json_ostream& operator<<(json_ostream& j, const T& v)
     }
     else if constexpr (is_associative_container_v<T>) {
         j.os << '{';
-        bool first = true;
-        for (const auto& [key, value] : v) {
-            if (!first) {
-                j.os << ',';
-            }
-            first = false;
-            j << key;  // Output the key
+        write_items(j, v, [&](const auto& kv) {
+            j << kv.first;
             j.os << ':';
-            j << value;  // Output the value
-        }
+            j << kv.second;
+        });
         j.os << '}';
     }
     else if constexpr (is_container_v<T>) {
         j.os << '[';
-        bool first = true;
-        for (const auto& elem : v) {
-            if (!first) {
-                j.os << ',';
-            }
-            first = false;
-            j << elem;  // Recursive call
-        }
+        write_items(j, v, [&](const auto& elem) { j << elem; });
         j.os << ']';
     }
     else if constexpr (accepts_v<T, json_writer>) {
-        j.os << '{';
-        json_writer writer{.out=j};
-        v.accept(writer);
-        j.os << '}';
+        write_object(j, [&](json_writer& w) { v.accept(w); });
     }
     else if constexpr (is_std_tuple_v<T>) {
-        j.os << '{';
-        json_writer writer{.out=j};
-        write_tuple(writer, v);
-        j.os << '}';
+        write_object(j, [&](json_writer& w) { write_tuple(w, v); });
     }
 
     return j;
