@@ -98,17 +98,17 @@ TEST_CASE("JSON input")
         CHECK(v["x"] == 10);
         CHECK(v["y"] == 20);
     }
-    SUBCASE("pair of ints")
+    SUBCASE("tuple - pair of ints")
     {
-        auto is = std::istringstream{"[1,2]"};
+        auto is = std::istringstream{R"({"0":1,"1":2})"};
         auto v = std::tuple<int, int>{};
         json_istream{is} >> v;
         CHECK(is);
         CHECK(v == std::tuple<int, int>{1, 2});
     }
-    SUBCASE("mixed types")
+    SUBCASE("tuple - mixed types")
     {
-        auto is = std::istringstream{"[true,7,3.14]"};
+        auto is = std::istringstream{R"({"0":true,"1":7,"2":3.14})"};
         auto v = std::tuple<bool, int, double>{};
         json_istream{is} >> v;
         CHECK(is);
@@ -116,7 +116,7 @@ TEST_CASE("JSON input")
     }
     SUBCASE("tuple - with string")
     {
-        auto is = std::istringstream{R"([42,"hello"])"};
+        auto is = std::istringstream{R"({"0":42,"1":"hello"})"};
         auto v = std::tuple<int, std::string>{};
         json_istream{is} >> v;
         CHECK(is);
@@ -124,7 +124,7 @@ TEST_CASE("JSON input")
     }
     SUBCASE("tuple - single element")
     {
-        auto is = std::istringstream{"[99]"};
+        auto is = std::istringstream{R"({"0":99})"};
         auto v = std::tuple<int>{};
         json_istream{is} >> v;
         CHECK(is);
@@ -132,7 +132,7 @@ TEST_CASE("JSON input")
     }
     SUBCASE("tuple - nested tuple")
     {
-        auto is = std::istringstream{"[1,[2,3]]"};
+        auto is = std::istringstream{R"({"0":1,"1":{"0":2,"1":3}})"};
         auto v = std::tuple<int, std::tuple<int, int>>{};
         json_istream{is} >> v;
         CHECK(is);
@@ -140,7 +140,7 @@ TEST_CASE("JSON input")
     }
     SUBCASE("tuple - vector in tuple")
     {
-        auto is = std::istringstream{"[[1,2,3]]"};
+        auto is = std::istringstream{R"({"0":[1,2,3]})"};
         auto v = std::tuple<std::vector<int>>{};
         json_istream{is} >> v;
         CHECK(is);

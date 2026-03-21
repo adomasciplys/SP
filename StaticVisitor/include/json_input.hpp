@@ -32,14 +32,10 @@ struct json_reader
 
 template <std::size_t I = 0, typename Tuple>
 requires(is_std_tuple_v<Tuple>)
-void read_tuple(json_istream& j, Tuple& t) {
+void read_tuple(json_reader& reader, Tuple& t) {
     if constexpr (I < std::tuple_size_v<Tuple>) {
-        if constexpr (I > 0) {
-            char comma;
-            j.is >> comma; // consume ','
-        }
-        j >> std::get<I>(t);
-        read_tuple<I+1>(j, t);
+        reader.visit("", std::get<I>(t));
+        read_tuple<I+1>(reader, t);
     }
 }
 
@@ -96,10 +92,11 @@ json_istream& operator>>(json_istream& j, T& v)
         j.is >> brace; // consume '}'
     }
     else if constexpr (is_std_tuple_v<T>) {
-        char ch;
-        j.is >> ch; // consume '['
-        read_tuple(j, v);
-        j.is >> ch; // consume ']'
+        char brace;
+        j.is >> brace; // consume '{'
+        json_reader reader{.in=j};
+        read_tuple(reader, v);
+        j.is >> brace; // consume '}'
     }
 
     return j;

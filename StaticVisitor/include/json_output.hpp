@@ -33,11 +33,10 @@ struct json_writer
 
 template <std::size_t I = 0, typename Tuple>
 requires(is_std_tuple_v<Tuple>)
-void write_tuple(json_ostream& j, const Tuple& t) {
+void write_tuple(json_writer& writer, const Tuple& t) {
     if constexpr (I < std::tuple_size_v<Tuple>) {
-        if constexpr (I > 0) j.os << ',';
-        j << std::get<I>(t);
-        write_tuple<I+1>(j, t);
+        writer.visit(std::to_string(I), std::get<I>(t));
+        write_tuple<I+1>(writer, t);
     }
 }
 
@@ -86,9 +85,10 @@ json_ostream& operator<<(json_ostream& j, const T& v)
         j.os << '}';
     }
     else if constexpr (is_std_tuple_v<T>) {
-        j.os << '[';
-        write_tuple(j, v);
-        j.os << ']';
+        j.os << '{';
+        json_writer writer{.out=j};
+        write_tuple(writer, v);
+        j.os << '}';
     }
 
     return j;
