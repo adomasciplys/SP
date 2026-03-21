@@ -7,12 +7,6 @@
 #include <string_view>
 #include <vector>
 
-/** TODO: implement json_istream adapter with json input operations
- * The goal is to exercise meta-programming and not have complete JSON (Unicode support is beyond the scope).
- * Parsing should follow the type structure rather than the content of the input stream.
- * Visitor parsing may depend on the order of fields, which is OK for this exercise.
- */
-
 struct json_istream
 {
     std::istream& is;
@@ -46,6 +40,24 @@ json_istream& operator>>(json_istream& j, T& v)
     }
     else if constexpr (is_string_v<T>) {
         j.is >> std::quoted(v);
+    }
+    else if constexpr (is_associative_container_v<T>) {
+        v.clear();
+        char ch;
+        j.is >> ch;  // consume '{'
+        j.is >> ch;  // first non-ws char: '}' if empty, otherwise start of first key
+        if (ch != '}') {
+            j.is.putback(ch);
+            do {
+                typename T::key_type key;
+                typename T::mapped_type value;
+                j >> key;      // Read the key
+                j.is >> ch;    // consume ':'
+                j >> value;    // Read the value
+                v.insert({key, value});
+                j.is >> ch;    // ',' or '}'
+            } while (ch != '}');
+        }
     }
     else if constexpr (is_container_v<T>) {
         v.clear();

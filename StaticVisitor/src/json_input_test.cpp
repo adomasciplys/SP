@@ -2,9 +2,11 @@
 #include "meta.hpp"
 #include "data.hpp"
 
+#include <map>
 #include <doctest/doctest.h>
 
 #include <sstream>
+#include <unordered_map>
 #include <vector>
 
 using namespace std::string_literals;
@@ -61,6 +63,42 @@ TEST_CASE("JSON input")
         CHECK(is);
         CHECK(v == std::vector{3, 7, 11});
     }
+    SUBCASE("map: simple")
+    {
+        auto is = std::istringstream{R"({"one":1,"two":2})"};
+        auto v = std::map<std::string, int>{};
+        json_istream{is} >> v;
+        CHECK(is);
+        CHECK(v == std::map<std::string, int>{{"one", 1}, {"two", 2}});
+    }
+    SUBCASE("map: empty")
+    {
+        auto is = std::istringstream{"{}"};
+        auto v = std::map<std::string, int>{};
+        json_istream{is} >> v;
+        CHECK(is);
+        CHECK(v.empty());
+    }
+    SUBCASE("map: complex values")
+    {
+        auto is = std::istringstream{R"({"a":[1,2,3],"b":[4,5,6]})"};
+        auto v = std::map<std::string, std::vector<int>>{};
+        json_istream{is} >> v;
+        CHECK(is);
+        CHECK(v == std::map<std::string, std::vector<int>>{{"a", {1, 2, 3}}, {"b", {4, 5, 6}}});
+    }
+    SUBCASE("unordered_map")
+    {
+        auto is = std::istringstream{R"({"x":10,"y":20})"};
+        auto v = std::unordered_map<std::string, int>{};
+        json_istream{is} >> v;
+        CHECK(is);
+        CHECK(v.size() == 2);
+        CHECK(v["x"] == 10);
+        CHECK(v["y"] == 20);
+    }
+
+
     static_assert(accepts_v<Aggregate&, json_reader>, "Aggregate should accept reader");
     static_assert(accepts_v<Nested&, json_reader>, "Nested should accept reader");
     // TODO: uncomment the following extra tests for meta library and fix accepts_v implementation

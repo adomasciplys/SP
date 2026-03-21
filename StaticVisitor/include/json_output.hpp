@@ -36,13 +36,13 @@ json_ostream& operator<<(json_ostream& j, const T& v)
     if constexpr (is_bool_v<T>) {
         j.os << (v ? "true" : "false");
     }
-    if constexpr (is_number_v<T>) {
+    else if constexpr (is_number_v<T>) {
         j.os << v;
     }
-    if constexpr (is_string_v<T>) {
+    else if constexpr (is_string_v<T>) {
         j.os << std::quoted(v);
     }
-    if constexpr (is_associative_container_v<T>) {
+    else if constexpr (is_associative_container_v<T>) {
         j.os << '{';
         bool first = true;
         for (const auto& [key, value] : v) {
@@ -56,7 +56,6 @@ json_ostream& operator<<(json_ostream& j, const T& v)
         }
         j.os << '}';
     }
-    // Needs to be else-if since associative containers (like std::map) satisfy both concepts
     else if constexpr (is_container_v<T>) {
         j.os << '[';
         bool first = true;
@@ -69,7 +68,7 @@ json_ostream& operator<<(json_ostream& j, const T& v)
         }
         j.os << ']';
     }
-    if constexpr (accepts_v<T, json_writer>) {
+    else if constexpr (accepts_v<T, json_writer>) {
         j.os << '{';
         json_writer writer{.out=j};
         v.accept(writer);
