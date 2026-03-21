@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string_view>
 #include <tuple>
+#include <utility>
 
 struct json_ostream
 {
@@ -21,10 +22,10 @@ struct json_writer
     template <typename Data>
     void visit(std::string_view name, const Data& value)
     {
-        if (!first_field) {
+        // We do not want to place a ',' before the first entry
+        if (!std::exchange(first_field, false)) {
             out.os << ',';
         }
-        first_field = false;
 
         out.os << '\"' << name << "\":";
         out << value;
