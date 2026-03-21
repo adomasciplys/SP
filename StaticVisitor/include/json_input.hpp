@@ -18,67 +18,20 @@ struct json_istream
     std::istream& is;
 };
 
-/** Check if the next character is a closing bracket (empty array) */
-inline bool is_empty_array(json_istream& j) {
-    if (j.is.peek() == ']') {
-        char bracket;
-        j.is >> bracket;  // Consume ']'
-        return true;
-    }
-    return false;
-}
-
-
-/** Read array elements until closing bracket */
-template <typename Container>
-requires is_container_v<Container>
-void read_container_elements(json_istream& j, Container& v) {
-    while (true) {
-        typename Container::value_type elem;
-        j >> elem;  // Recursively read element
-        v.insert(v.end(), elem);  // Works for vectors, sets, etc.
-        j.is >> std::ws;
-
-        char ch;
-        j.is >> ch; // Either "," (continue) or ']' (stop)
-        if (ch == ']') {
-            break;  // End of container
-        }
-    }
-}
-
 /** Visitor pattern support for reading JSON */
 struct json_reader
 {
     json_istream& in;
 
     template <typename Data>
-
     void visit(std::string_view name, Data& value)
     {
-        // Skip whitespace
-        in.is >> std::ws;
-
-        // Read field name (with quotes)
-        char quote;
-        in.is >> quote;  // Opening quote
         std::string field_name;
-        std::getline(in.is, field_name, '"');  // Read until closing quote
-
-        // Skip whitespace and colon
-        in.is >> std::ws;
         char colon;
-        in.is >> colon;
-
-        // Read the value recursively
+        in.is >> std::quoted(field_name) >> colon;
         in >> value;
-
-        // Skip whitespace and comma (if present)
-        in.is >> std::ws;
         char ch;
-        if (in.is.peek() == ',') {
-            in.is >> ch;
-        }
+        if (in.is.peek() == ',') in.is >> ch;
     }
 };
 
@@ -89,37 +42,32 @@ json_istream& operator>>(json_istream& j, T& v)
         j.is >> std::boolalpha >> v;
     }
     else if constexpr (is_number_v<T>) {
-        j.is >> v; // Handled natively bi istream
+        j.is >> v;
     }
     else if constexpr (is_string_v<T>) {
         j.is >> std::quoted(v);
     }
     else if constexpr (is_container_v<T>) {
-        v.clear(); // Container might already contain values
-
-        // Read opening bracket
-        j.is >> std::ws;
-        char bracket;
-        j.is >> bracket;  // Consume '['
-        j.is >> std::ws;
-
-        // Check if empty array
-        if (is_empty_array(j)) {
-            return j;
+        v.clear();
+        char ch;
+        j.is >> ch; // consume '['
+        j.is >> ch; // first non-ws char: ']' if empty, otherwise start of first element
+        if (ch != ']') {
+            j.is.putback(ch);
+            do {
+                typename T::value_type elem;
+                j >> elem;
+                v.insert(v.end(), elem);
+                j.is >> ch; // ',' or ']'
+            } while (ch != ']');
         }
-
-        // Read elements
-        read_container_elements(j, v);
     }
     else if constexpr (accepts_v<T, json_reader>) {
-        j.is >> std::ws;
-        char start_brace;
-        j.is >> start_brace; // Consume '{'
+        char brace;
+        j.is >> brace; // consume '{'
         json_reader reader {.in=j};
         v.accept(reader);
-        j.is >> std::ws;
-        char end_brace;
-        j.is >> end_brace; // Consume '}'
+        j.is >> brace; // consume '}'
     }
 
     return j;
