@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string_view>
+#include <tuple>
 
 struct json_ostream
 {
@@ -29,6 +30,16 @@ struct json_writer
         out << value;
     };
 };
+
+template <std::size_t I = 0, typename Tuple>
+requires(is_std_tuple_v<Tuple>)
+void write_tuple(json_ostream& j, const Tuple& t) {
+    if constexpr (I < std::tuple_size_v<Tuple>) {
+        if constexpr (I > 0) j.os << ',';
+        j << std::get<I>(t);
+        write_tuple<I+1>(j, t);
+    }
+}
 
 template <typename T>
 json_ostream& operator<<(json_ostream& j, const T& v)
@@ -73,6 +84,11 @@ json_ostream& operator<<(json_ostream& j, const T& v)
         json_writer writer{.out=j};
         v.accept(writer);
         j.os << '}';
+    }
+    else if constexpr (is_std_tuple_v<T>) {
+        j.os << '[';
+        write_tuple(j, v);
+        j.os << ']';
     }
 
     return j;

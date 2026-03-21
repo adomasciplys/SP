@@ -9,6 +9,8 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <tuple>
+#include <array>
 
 using namespace std::string_literals;
 
@@ -92,6 +94,36 @@ TEST_CASE("JSON output")
         const auto m = std::map<std::string, std::string>{{"key", "value"}};
         jos << m;
         CHECK(os.str() == R"({"key":"value"})");
+    }
+    SUBCASE("tuple - pair of ints")
+    {
+        jos << std::tuple<int, int>{1, 2};
+        CHECK(os.str() == "[1,2]");
+    }
+    SUBCASE("tuple - mixed types")
+    {
+        jos << std::tuple<bool, int, double>{true, 7, 3.14};
+        CHECK(os.str() == "[true,7,3.14]");
+    }
+    SUBCASE("tuple - single element")
+    {
+        jos << std::tuple<int>{99};
+        CHECK(os.str() == "[99]");
+    }
+    SUBCASE("tuple - nested tuple")
+    {
+        jos << std::tuple<int, std::tuple<int, int>>{1, {2, 3}};
+        CHECK(os.str() == "[1,[2,3]]");
+    }
+    SUBCASE("tuple - vector in tuple")
+    {
+        jos << std::tuple<std::vector<int>>{std::vector{1, 2, 3}};
+        CHECK(os.str() == "[[1,2,3]]");
+    }
+    SUBCASE("tuple - int, string, vector")
+    {
+        jos << std::tuple<int, std::string, std::vector<int>>{7, "hello", std::vector{10, 20}};
+        CHECK(os.str() == R"([7,"hello",[10,20]])");
     }
     static_assert(accepts_v<const Aggregate&, json_writer>, "const Aggregate should accept writer");
     static_assert(accepts_v<const Nested&, json_writer>, "const Nested should accept writer");

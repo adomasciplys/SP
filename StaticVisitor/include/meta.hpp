@@ -1,5 +1,6 @@
 #ifndef STATIC_VISITOR_META_HPP
 #define STATIC_VISITOR_META_HPP
+#include <tuple>
 #include <type_traits>
 #include <concepts>
 #include <string>
@@ -44,6 +45,27 @@ concept is_associative_container_v =
  requires {
     typename std::remove_cvref_t<T>::mapped_type;
  } && is_container_v<T>; // Use our previously declared is_container
+
+
+// My initial idea was just to check for std::tuple_size, but
+// it is specialized for std::array, std::pair, and std::tuple, so it can't distinguish between them.
+
+// Flow (Personal Notes):
+// Input Type: const std::tuple<int, double>&
+// Concept sees: is_std_tuple_v<const std::tuple<int, double>&>
+// Concept removes wrappers: std::remove_cvref_t<const std::tuple<int, double>&> = std::tuple<int, double>
+// Concept instantiates struct: is_std_tuple_impl<std::tuple<int, double>>
+// Struct matches specialization: template<typename... Args> struct is_std_tuple_impl<std::tuple<Args...>>
+// Specialization inherits std::true_type
+// Concept extracts: ::value = true
+template <typename T>
+struct is_std_tuple_impl : std::false_type {}; // Default: All types or NOT tuples
+
+template <typename... Args>
+struct is_std_tuple_impl<std::tuple<Args...>> : std::true_type {};
+
+template <typename T>
+concept is_std_tuple_v = is_std_tuple_impl<std::remove_cvref_t<T>>::value;
 
 
 

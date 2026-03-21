@@ -126,6 +126,31 @@ static_assert(!is_associative_container_v<std::vector<std::pair<int, int>>>, "ve
 static_assert(!is_associative_container_v<int>, "int is not an associative container");
 static_assert(!is_associative_container_v<std::string>, "string is not an associative container");
 
+/** is_std_tuple_v tests: */
+static_assert(is_std_tuple_v<std::tuple<int, std::string, double, float>>, "tuple with 4 elements is a tuple");
+static_assert(is_std_tuple_v<std::tuple<int>>, "tuple with 1 element is a tuple");
+static_assert(is_std_tuple_v<std::tuple<>>, "empty tuple is a tuple");
+static_assert(is_std_tuple_v<std::tuple<int, int, int>>, "tuple with repeated types is a tuple");
+static_assert(is_std_tuple_v<std::tuple<int&, const std::string&, double>>, "tuple with references is a tuple");
+static_assert(is_std_tuple_v<std::tuple<std::tuple<int, int>, std::string>>, "nested tuple is a tuple");
+static_assert(is_std_tuple_v<std::tuple<int>&>, "reference to tuple is a tuple");
+static_assert(is_std_tuple_v<std::tuple<int>&&>, "rvalue reference to tuple is a tuple");
+static_assert(is_std_tuple_v<const std::tuple<int>>, "const tuple is a tuple");
+static_assert(is_std_tuple_v<const std::tuple<int>&>, "const reference to tuple is a tuple");
+static_assert(is_std_tuple_v<volatile std::tuple<int>>, "volatile tuple is a tuple");
+
+static_assert(!is_std_tuple_v<std::pair<int, int>>, "pair is not a tuple");
+static_assert(!is_std_tuple_v<std::pair<int, std::string>>, "pair with different types is not a tuple");
+static_assert(!is_std_tuple_v<std::array<int, 3>>, "array is not a tuple");
+static_assert(!is_std_tuple_v<std::vector<int>>, "vector is not a tuple");
+static_assert(!is_std_tuple_v<std::set<int>>, "set is not a tuple");
+static_assert(!is_std_tuple_v<std::map<int, int>>, "map is not a tuple");
+static_assert(!is_std_tuple_v<int>, "int is not a tuple");
+static_assert(!is_std_tuple_v<double>, "double is not a tuple");
+static_assert(!is_std_tuple_v<std::string>, "string is not a tuple");
+static_assert(!is_std_tuple_v<bool>, "bool is not a tuple");
+static_assert(!is_std_tuple_v<int*>, "pointer to int is not a tuple");
+static_assert(!is_std_tuple_v<std::tuple<int>*>, "pointer to tuple is not a tuple");
 
 
 TEST_CASE("Tests for meta library are compile-time only") { CHECK(true); }
