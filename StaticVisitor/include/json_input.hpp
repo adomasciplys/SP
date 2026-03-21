@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string_view>
+#include <tuple>
 #include <vector>
 
 struct json_istream
@@ -28,6 +29,19 @@ struct json_reader
         if (in.is.peek() == ',') in.is >> ch;
     }
 };
+
+template <std::size_t I = 0, typename Tuple>
+requires(is_std_tuple_v<Tuple>)
+void read_tuple(json_istream& j, Tuple& t) {
+    if constexpr (I < std::tuple_size_v<Tuple>) {
+        if constexpr (I > 0) {
+            char comma;
+            j.is >> comma; // consume ','
+        }
+        j >> std::get<I>(t);
+        read_tuple<I+1>(j, t);
+    }
+}
 
 template <typename T>
 json_istream& operator>>(json_istream& j, T& v)
@@ -80,6 +94,12 @@ json_istream& operator>>(json_istream& j, T& v)
         json_reader reader {.in=j};
         v.accept(reader);
         j.is >> brace; // consume '}'
+    }
+    else if constexpr (is_std_tuple_v<T>) {
+        char ch;
+        j.is >> ch; // consume '['
+        read_tuple(j, v);
+        j.is >> ch; // consume ']'
     }
 
     return j;

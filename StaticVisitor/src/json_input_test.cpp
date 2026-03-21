@@ -6,6 +6,7 @@
 #include <doctest/doctest.h>
 
 #include <sstream>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -96,6 +97,54 @@ TEST_CASE("JSON input")
         CHECK(v.size() == 2);
         CHECK(v["x"] == 10);
         CHECK(v["y"] == 20);
+    }
+    SUBCASE("pair of ints")
+    {
+        auto is = std::istringstream{"[1,2]"};
+        auto v = std::tuple<int, int>{};
+        json_istream{is} >> v;
+        CHECK(is);
+        CHECK(v == std::tuple<int, int>{1, 2});
+    }
+    SUBCASE("mixed types")
+    {
+        auto is = std::istringstream{"[true,7,3.14]"};
+        auto v = std::tuple<bool, int, double>{};
+        json_istream{is} >> v;
+        CHECK(is);
+        CHECK(v == std::tuple<bool, int, double>{true, 7, 3.14});
+    }
+    SUBCASE("tuple - with string")
+    {
+        auto is = std::istringstream{R"([42,"hello"])"};
+        auto v = std::tuple<int, std::string>{};
+        json_istream{is} >> v;
+        CHECK(is);
+        CHECK(v == std::tuple<int, std::string>{42, "hello"});
+    }
+    SUBCASE("tuple - single element")
+    {
+        auto is = std::istringstream{"[99]"};
+        auto v = std::tuple<int>{};
+        json_istream{is} >> v;
+        CHECK(is);
+        CHECK(v == std::tuple<int>{99});
+    }
+    SUBCASE("tuple - nested tuple")
+    {
+        auto is = std::istringstream{"[1,[2,3]]"};
+        auto v = std::tuple<int, std::tuple<int, int>>{};
+        json_istream{is} >> v;
+        CHECK(is);
+        CHECK(v == std::tuple<int, std::tuple<int, int>>{1, {2, 3}});
+    }
+    SUBCASE("tuple - vector in tuple")
+    {
+        auto is = std::istringstream{"[[1,2,3]]"};
+        auto v = std::tuple<std::vector<int>>{};
+        json_istream{is} >> v;
+        CHECK(is);
+        CHECK(v == std::tuple<std::vector<int>>{{1, 2, 3}});
     }
 
 
