@@ -19,7 +19,7 @@ template <typename T>
 concept is_character_v = std::same_as<std::remove_cvref_t<T>, char>;
 
 template <typename T>
-// Check if we can convert the type to std::string_view, very smart
+// Check if we can convert the type to std::string_view
 concept is_string_v = std::is_convertible_v<std::remove_cvref_t<T>, std::string_view>;
 
 template <typename T>

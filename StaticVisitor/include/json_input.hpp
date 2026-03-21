@@ -19,12 +19,41 @@ struct json_istream
     std::istream& is;
 };
 
+/** Check if the next character is a closing bracket (empty array) */
+inline bool is_empty_array(json_istream& j) {
+    if (j.is.peek() == ']') {
+        char bracket;
+        j.is >> bracket;  // Consume ']'
+        return true;
+    }
+    return false;
+}
+
+/** Read array elements until closing bracket */
+template <typename Container>
+requires is_container_v<Container>
+void read_container_elements(json_istream& j, Container& v) {
+    while (true) {
+        typename Container::value_type elem;
+        j >> elem;  // Recursively read element
+        v.insert(v.end(), elem);  // Works for vectors, sets, etc.
+        j.is >> std::ws;
+
+        char ch;
+        j.is >> ch; // Either "," (continue) or ']' (stop)
+        if (ch == ']') {
+            break;  // End of container
+        }
+    }
+}
+
 /** Visitor pattern support for reading JSON */
 struct json_reader
 {
     json_istream& in;
 
     template <typename Data>
+
     void visit(std::string_view name, Data& value)
     {
         // Skip whitespace
@@ -62,50 +91,30 @@ json_istream& operator>>(json_istream& j, T& v)
         v = (bool_str == "true");
     }
     if constexpr (is_number_v<T>) {
-        j.is >> v;
+        j.is >> v; // Handled natively bi istream
     }
     if constexpr (is_string_v<T>) {
         j.is >> std::quoted(v);
     }
     if constexpr (is_container_v<T>) {
-        v.clear();  // Clear the container first
+        v.clear(); // Container might already contain values
 
         // Read opening bracket
         j.is >> std::ws;
         char bracket;
-        j.is >> bracket;  // Should be '['
-
+        j.is >> bracket;  // Consume '['
         j.is >> std::ws;
+
         // Check if empty array
-        if (j.is.peek() == ']') {
-            j.is >> bracket;  // Consume ']'
+        if (is_empty_array(j)) {
             return j;
         }
 
         // Read elements
-        while (true) {
-            typename T::value_type elem;
-            j >> elem;  // Recursively read element
-            v.insert(v.end(), elem);  // Works for vectors, sets, etc.
-
-            j.is >> std::ws;
-            char ch;
-            j.is >> ch;
-            if (ch == ']') {
-                break;  // End of array
-            }
-            // Otherwise ch should be ',', continue reading
-        }
+        read_container_elements(j, v);
     }
+    
 
-
-
-
-    /** TODO: implement input of arbitrary types so that tests in json_input_test pass.
-     * Focus on one test at a time: begin from the first and then continue to next.
-     * In order to support various types, develop and test meta-predicates (see meta_test.cpp)
-     * Tip: either use if-constexpr or overloading with SFINAE/concepts
-     */
     return j;
 }
 
