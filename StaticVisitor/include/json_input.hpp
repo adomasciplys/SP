@@ -2,7 +2,7 @@
 #define STATIC_VISITOR_JSON_INPUT_HPP
 
 #include "meta.hpp"
-
+#include <cctype>
 #include <iomanip>
 #include <iostream>
 #include <string_view>
@@ -27,6 +27,24 @@ inline bool is_empty_array(json_istream& j) {
         return true;
     }
     return false;
+}
+
+/** Read an unquoted JSON token (true, false, numbers) until delimiter */
+inline std::string read_json_token(json_istream& j) {
+    std::string token;
+    char ch;
+    while (j.is.get(ch)) {
+        // Stop at JSON delimiters: comma, closing brace/bracket, or whitespace
+        if (ch == ',' || ch == '}' || ch == ']' || (std::isspace(ch) != 0)) {
+            j.is.unget();  // Put the delimiter back
+            break;
+        }
+        token += ch;
+    }
+    if (!token.empty() && j.is.fail() && !j.is.bad()) {
+        j.is.clear();
+    }
+    return token;
 }
 
 /** Read array elements until closing bracket */
@@ -86,17 +104,16 @@ template <typename T>
 json_istream& operator>>(json_istream& j, T& v)
 {
     if constexpr (is_bool_v<T>) {
-        std::string bool_str;
-        j.is >> bool_str;
+        const std::string bool_str = read_json_token(j);
         v = (bool_str == "true");
     }
-    if constexpr (is_number_v<T>) {
+    else if constexpr (is_number_v<T>) {
         j.is >> v; // Handled natively bi istream
     }
-    if constexpr (is_string_v<T>) {
+    else if constexpr (is_string_v<T>) {
         j.is >> std::quoted(v);
     }
-    if constexpr (is_container_v<T>) {
+    else if constexpr (is_container_v<T>) {
         v.clear(); // Container might already contain values
 
         // Read opening bracket
@@ -113,7 +130,16 @@ json_istream& operator>>(json_istream& j, T& v)
         // Read elements
         read_container_elements(j, v);
     }
-    
+    else if constexpr (accepts_v<T, json_reader>) {
+        j.is >> std::ws;
+        char start_brace;
+        j.is >> start_brace; // Consume '{'
+        json_reader reader {.in=j};
+        v.accept(reader);
+        j.is >> std::ws;
+        char end_brace;
+        j.is >> end_brace; // Consume '}'
+    }
 
     return j;
 }
