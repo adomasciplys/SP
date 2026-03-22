@@ -18,9 +18,11 @@ void fill_with_data(std::vector<int>& data, size_t count)
     std::generate_n(std::back_inserter(data), count, [](){ return dist(gen); });
 }
 
-void print_data(std::ostream& os, const std::vector<int>& data)
+template <typename T>
+void print_data(std::ostream& os, T&& data)
 {
-    std::copy(data.begin(), data.end(), std::ostream_iterator<int>(os, " "));
+    using value_type = typename std::decay_t<T>::value_type;
+    std::copy(data.begin(), data.end(), std::ostream_iterator<value_type>(os, " "));
     os << '\n';
 }
 
@@ -41,26 +43,24 @@ size_t odd_count(const std::vector<int>& data)
 
 std::vector<std::string> stringify(const std::vector<int>& data)
 {
-    /** TODO: use transform instead */
-    auto res = std::vector<std::string>{};
-    for (auto&& d : data)
-        res.push_back(std::to_string(d));
+    std::vector<std::string> res;
+    std::ranges::transform(data, std::back_inserter(res),
+                          [](int d) { return std::to_string(d); });
     return res;
 }
 
 std::vector<std::string> compute_sorted(const std::vector<std::string>& data)
 {
-    /** TODO: use std::sort */
-    auto res = data;
-    // sorting implementation of decreasing alphabetical order
+
+    auto res = data;  // Make a copy first
+    std::sort(res.begin(), res.end(), [](std::string d, std::string s) { return d > s; });
     return res;
 }
 
-std::vector<int> squares(const std::vector<int>&)
+std::vector<int> squares(const std::vector<int>& data)
 {
-    /** TODO: find and use an applicable std algorithm */
     auto res = std::vector<int>{};
-    // compute square of each input element
+    std::ranges::transform(data, std::back_inserter(res), [](int d) { return d * d;});
     return res;
 }
 
@@ -102,6 +102,45 @@ void test_odd_count(const std::vector<int>& data)
     CHECK(actual_count == odd_count(data));
 }
 
+void test_stringify(const std::vector<int>& data)
+{
+    auto res = std::vector<std::string>{};
+    for (auto&& d : data)
+        res.push_back(std::to_string(d));
+    CHECK(res == stringify(data));
+}
+
+void test_compute_sorted(const std::vector<std::string>& data)
+{
+    auto res = compute_sorted(data);
+
+    // 1. Check size hasn't changed
+    CHECK(res.size() == data.size());
+
+    // 2. Verify it's actually sorted in decreasing order
+    for (size_t i = 1; i < res.size(); ++i) {
+        CHECK(res[i-1] >= res[i]);  // Each element >= next (decreasing)
+    }
+
+    // 3. Verify all original elements are still present (it's a permutation)
+    auto sorted_copy = data;
+    std::sort(sorted_copy.begin(), sorted_copy.end());
+    auto sorted_res = res;
+    std::sort(sorted_res.begin(), sorted_res.end());
+    CHECK(sorted_copy == sorted_res);
+}
+
+void test_squares(const std::vector<int>& data)
+{
+    auto res = std::vector<int>{};
+    auto compute = squares(data);
+
+    for (auto&& d : data) {
+        res.push_back(d * d);
+    }
+    CHECK(res == compute);
+}
+
 
 TEST_CASE("Lambda puzzle3")
 {
@@ -125,12 +164,20 @@ TEST_CASE("Lambda puzzle3")
     test_odd_count(data);
     std::cout << "odd count: " << odd_count(data) << std::endl;
 
-    /** TODO: write test for stringify */
+    /** Test for stringify */
     auto data_str = stringify(data);
-    /** TODO: write test for compute_sorted */
+    test_stringify(data);
+
+
+    /** Test for compute_sorted */
     auto sorted_str = compute_sorted(data_str);
-    /** TODO: write test for squares */
+    test_compute_sorted(data_str);
+
+
+    /** Test for squares */
+    test_squares(data);
+
     // make print_data a function template, so that the following is accepted:
-    // print_data(std::cout, sorted_str);
+    print_data(std::cout, sorted_str);
     print_data(std::cout, squares(data));
 }
