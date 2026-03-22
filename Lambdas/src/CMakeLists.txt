@@ -11,6 +11,10 @@ target_link_libraries(lambda_puzzle3 PRIVATE doctest::doctest_with_main)
 
 add_executable(lambda_api lambda_api.cpp)
 
+add_executable(lambda_api_bench lambda_api_bench.cpp)
+target_link_libraries(lambda_api_bench PRIVATE benchmark::benchmark)
+add_benchmark(lambda_api_bench)
+
 add_library(abc_csv OBJECT abc_csv.cpp)
 add_executable(abc_csv_test abc_csv_test.cpp)
 target_link_libraries(abc_csv_test PRIVATE abc_csv doctest::doctest_with_main)
