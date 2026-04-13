@@ -1,6 +1,9 @@
 add_library(fibonacci OBJECT fibonacci.cpp)
 target_compile_features(fibonacci PUBLIC cxx_std_23)
 
+add_library(collatz OBJECT collatz.cpp)
+target_compile_features(collatz PUBLIC cxx_std_23)
+
 add_library(generator OBJECT generator.cpp)
 target_compile_features(generator PUBLIC cxx_std_20)
 
