@@ -69,7 +69,7 @@ ctest --test-dir build
    * **Optional:** checkout `tests` branch with tests for Collatz functions and start from there (implement TODO items in [collatz.hpp](include/collatz.hpp) and [collatz.cpp](source/collatz.cpp) files).
 5. Given a positive number, estimate the length of the Collatz sequence for that number. **IMPLEMENTED**
 6. Create another coroutine generating an infinite sequence of lengths of Collatz sequences starting with 0, 1, 2, and so on. For example, the first 10 numbers: `0 1 2 8 3 6 9 17 4 20`. **IMPLEMENTED**
-7. Compute the maximal length of Collatz sequences for starting numbers of up to 100.
+7. Compute the maximal length of Collatz sequences for starting numbers of up to 100. **IMPLEMENTED**
 8. If time permits, add [memoization](https://en.wikipedia.org/wiki/Memoization) to Collatz length coroutine.
 
 ## Hints

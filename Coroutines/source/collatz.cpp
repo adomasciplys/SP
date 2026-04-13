@@ -44,7 +44,21 @@ std::generator<Number> collatz_length(Number number_count)
     }
 }
 
+template <std::integral Number>
+std::generator<Number> max_collatz()
+{
+    Number current_max = 0;
+    for (Number i = 0; ; ++i) {
+        Number len = estimate_length(i);
+        if (len > current_max) {
+            current_max = len;
+        }
+        co_yield current_max;
+    }
+}
+
 /// Explicit template instantiations to cover common types
 template std::generator<size_t> collatz<size_t>(size_t);
 template std::generator<int> collatz<int>(int);
 template std::generator<size_t> collatz_length<size_t>(size_t);
+template std::generator<size_t> max_collatz<size_t>();

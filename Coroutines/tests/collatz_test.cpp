@@ -36,4 +36,17 @@ TEST_CASE("Collatz Length")
     CHECK(vi == std::vector<size_t>{0, 1, 2, 8, 3, 6, 9, 17, 4, 20});
 }
 
+TEST_CASE("Max Collatz")
+{
+    const auto vi = std::vector(std::from_range, max_collatz<std::size_t>() | std::views::take(11));
+    REQUIRE(vi.size() == 11);
+    CHECK(vi == std::vector<size_t>{0, 1, 2, 8, 8, 8, 9, 17, 17, 20, 20});
+}
+
+TEST_CASE("Max Collatz up to 100")
+{
+    const auto vi = std::vector(std::from_range, max_collatz<std::size_t>() | std::views::take(101));
+    CHECK(vi.back() == 119);
+}
+
 TEST_SUITE_END();

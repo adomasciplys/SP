@@ -12,5 +12,8 @@ std::generator<Number> collatz_length(Number start = 0);
 
 auto estimate_length(std::size_t n) -> std::size_t;
 
+template <std::integral Number = std::size_t>
+std::generator<Number> max_collatz();
+
 
 #endif  // COROUTINES_COLLATZ_HPP
