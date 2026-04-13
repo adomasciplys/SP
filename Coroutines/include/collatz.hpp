@@ -5,7 +5,7 @@
 
 /// Demonstrates the use of std::generator, @returns an infinite range of Collatz numbers
 template <std::integral Number = std::size_t>
-std::generator<Number> collatz(Number start = 1);
+std::generator<Number> collatz(Number start = 0);
 
 
 #endif  // COROUTINES_COLLATZ_HPP

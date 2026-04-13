@@ -16,4 +16,11 @@ TEST_CASE("Collatz Numbers")
     CHECK(vi == std::vector<size_t>{7, 22, 11, 34, 17, 52, 26, 13, 40, 20, 10, 5, 16, 8, 4, 2, 1});
 }
 
+TEST_CASE("Collatz Numbers Empty")
+{
+    const auto vi = std::vector(std::from_range, collatz<std::size_t>(0) | std::views::take(1));
+    REQUIRE(vi.size() == 0);
+    CHECK(vi == std::vector<size_t>{});
+}
+
 TEST_SUITE_END();

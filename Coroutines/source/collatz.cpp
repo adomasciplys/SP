@@ -3,7 +3,7 @@
 #include <concepts>
 #include <generator>  // C++23
 
-/// Uses coroutines to implement an infinite range of Fibonacci numbers
+/// Uses coroutines to implement an infinite range of Collatz numbers
 template <std::integral Number>
 std::generator<Number> collatz(Number start)
 {
