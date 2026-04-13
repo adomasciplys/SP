@@ -63,12 +63,12 @@ ctest --test-dir build
    - What library is used to implement `Fibonacci()`?
 4. Create a [Collatz](https://en.wikipedia.org/wiki/Collatz_conjecture) sequence generator coroutine for a given positive starting number. 
    * For example, the following is the sequence starting with 7:
-     `7 22 11 34 17 52 26 13 40 20 10 5 16 8 4 2 1`.
-   * Collatz sequence is empty for `0`.
+     `7 22 11 34 17 52 26 13 40 20 10 5 16 8 4 2 1`. **IMPLEMENTED**
+   * Collatz sequence is empty for `0` - **IMPLEMENTED**
    * Use these facts in your unit tests.
    * **Optional:** checkout `tests` branch with tests for Collatz functions and start from there (implement TODO items in [collatz.hpp](include/collatz.hpp) and [collatz.cpp](source/collatz.cpp) files).
-5. Given a positive number, estimate the length of the Collatz sequence for that number.
-6. Create another coroutine generating an infinite sequence of lengths of Collatz sequences starting with 0, 1, 2, and so on. For example, the first 10 numbers: `0 1 2 8 3 6 9 17 4 20`.
+5. Given a positive number, estimate the length of the Collatz sequence for that number. **IMPLEMENTED**
+6. Create another coroutine generating an infinite sequence of lengths of Collatz sequences starting with 0, 1, 2, and so on. For example, the first 10 numbers: `0 1 2 8 3 6 9 17 4 20`. **IMPLEMENTED**
 7. Compute the maximal length of Collatz sequences for starting numbers of up to 100.
 8. If time permits, add [memoization](https://en.wikipedia.org/wiki/Memoization) to Collatz length coroutine.
 

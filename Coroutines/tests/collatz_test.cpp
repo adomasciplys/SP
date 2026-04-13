@@ -23,4 +23,17 @@ TEST_CASE("Collatz Numbers Empty")
     CHECK(vi == std::vector<size_t>{});
 }
 
+TEST_CASE("Collatz Estimate")
+{
+    const auto res = estimate_length(3);
+    CHECK(res == 8);
+}
+
+TEST_CASE("Collatz Length")
+{
+    const auto vi = std::vector(std::from_range, collatz_length<std::size_t>(10) | std::views::take(10));
+    REQUIRE(vi.size() == 10);
+    CHECK(vi == std::vector<size_t>{0, 1, 2, 8, 3, 6, 9, 17, 4, 20});
+}
+
 TEST_SUITE_END();
