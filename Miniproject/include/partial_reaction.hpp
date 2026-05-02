@@ -6,8 +6,8 @@
 
 namespace stochastic {
 
-// An intermediate result in the reaction DSL: the inputs and rate are known,
-// but the products have not been supplied yet.
+// An intermediate result in the reaction DSL:
+//     - The inputs and rate are known, but the products have not been supplied yet.
 // Produced by `>>` and consumed by `>>=`
 //
 // Example: in `(A + B) >> rate >>= C`, the sub-expression `(A + B) >> rate`

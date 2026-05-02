@@ -8,16 +8,15 @@
 namespace stochastic {
 
 // A complete reaction rule: `inputs --(rate)--> products`.
-// Built by `>>=` from a PartialReaction (which already carries inputs + rate)
-// and the products on the right-hand side.
+// Built by `>>=` from a PartialReaction and the products on the right-hand side.
 //
-// Full DSL chain for `(A + B) >> rate >>= C + D`:
+// Full chain for `(A + B) >> rate >>= C + D`:
 //   1. `A + B`               -> ReactantList   (operator+ in reactant_list.hpp)
 //   2. `... >> rate`         -> PartialReaction (operator>> in partial_reaction.hpp)
 //   3. `... >>= C + D`       -> Reaction        (operator>>= below)
 //
-// Operator precedence makes this parse without extra parens: `+` binds tighter
-// than `>>`, which binds tighter than `>>=`.
+// Operator precedence makes this parse without extra parens:
+// `+` binds tighter than `>>`, which binds tighter than `>>=`.
 struct Reaction
 {
     ReactantList inputs;
