@@ -1,6 +1,5 @@
 #include "vessel.hpp"
 
-#include <stdexcept>
 #include <utility>
 
 namespace stochastic {
@@ -14,11 +13,9 @@ Reactant Vessel::environment() const
 
 Reactant Vessel::add(std::string name, std::size_t initial_count)
 {
-    if (_index.find(name) != _index.end())
-        throw std::invalid_argument("reactant '" + name + "' already exists");
-
+    // Symbol table enforces uniqueness; throws std::invalid_argument on duplicate.
+    _index.insert(name, _species.size());
     Reactant r{name, initial_count};
-    _index.emplace(name, _species.size());
     _species.push_back(r);
     return r;
 }
@@ -26,6 +23,12 @@ Reactant Vessel::add(std::string name, std::size_t initial_count)
 void Vessel::add(Reaction r)
 {
     _reactions.push_back(std::move(r));
+}
+
+const Reactant& Vessel::find(const std::string& name) const
+{
+    // Symbol table throws std::out_of_range if `name` is not registered.
+    return _species.at(_index.lookup(name));
 }
 
 }  // namespace stochastic
