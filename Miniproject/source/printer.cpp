@@ -5,17 +5,22 @@
 #include "reaction.hpp"
 #include "vessel.hpp"
 
+#include <algorithm>
+
 namespace stochastic {
 
-namespace {
-bool contains_named(const ReactantList& list, const std::string& name)
+static bool contains(const ReactantList& list, const std::string& name)
 {
-    for (const auto& r : list.items)
-        if (r.name == name)
-            return true;
-    return false;
+    return std::ranges::any_of(list.items,
+                               [&](const Reactant& r) { return r.name == name; });
 }
-}  // namespace
+
+// A species is a catalyst of a reaction when it appears on both sides:
+// consumed as an input and produced again, with no net change in count.
+static bool is_catalyst(const Reaction& r, const std::string& name)
+{
+    return contains(r.inputs, name) && contains(r.products, name);
+}
 
 Printer::Printer(std::ostream& os) : _os(os) {}
 
@@ -35,23 +40,22 @@ void Printer::visit(const Reaction& r)
         << "[label=\"" << r.rate
         << "\",shape=\"oval\",style=\"filled\",fillcolor=\"yellow\"];\n";
 
-    // Inputs: species -> reaction. Catalysts (also in products) use arrowhead="tee"
-    // and skip the matching reaction -> species edge below.
+    // Inputs: species -> reaction. Catalysts use arrowhead="tee".
     for (const auto& in : r.inputs.items) {
         if (in.is_environment())
             continue;
-        const bool is_catalyst = contains_named(r.products, in.name);
         _os << "  s" << _species_id.lookup(in.name) << " -> r" << rid;
-        if (is_catalyst)
+        if (is_catalyst(r, in.name))
             _os << " [arrowhead=\"tee\"]";
         _os << ";\n";
     }
 
-    // Products: reaction -> species, skipping catalysts already drawn above.
+    // Products: reaction -> species. Catalysts were already drawn as a single
+    // tee-arrow input edge above, so skip them here to avoid a redundant edge.
     for (const auto& out : r.products.items) {
         if (out.is_environment())
             continue;
-        if (contains_named(r.inputs, out.name))
+        if (is_catalyst(r, out.name))
             continue;
         _os << "  r" << rid << " -> s" << _species_id.lookup(out.name) << ";\n";
     }
