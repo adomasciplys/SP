@@ -1,8 +1,10 @@
+#include "printer.hpp"
 #include "vessel.hpp"
 
 #include <cstddef>
 #include <iostream>
 
+using stochastic::Printer;
 using stochastic::Vessel;
 
 // Genetic oscillator for circadian rhythm - Listing 1
@@ -77,6 +79,9 @@ static void dump(const Vessel& v)
 
 int main()
 {
-    dump(circadian_rhythm());
+    const auto v = circadian_rhythm();
+    dump(v);
+    std::cout << "\n";
+    Printer{std::cout}.visit(v);
     return 0;
 }

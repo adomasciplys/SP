@@ -8,7 +8,8 @@ add_library(stochastic STATIC
     source/reactant_list.cpp
     source/partial_reaction.cpp
     source/reaction.cpp
-    source/vessel.cpp)
+    source/vessel.cpp
+    source/printer.cpp)
 target_include_directories(stochastic PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 # Example programs.

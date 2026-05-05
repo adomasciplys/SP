@@ -1,26 +1,23 @@
 #ifndef MINIPROJECT_VISITOR_HPP
 #define MINIPROJECT_VISITOR_HPP
 
-namespace stochastic
+namespace stochastic {
+
+struct Reactant;
+struct Reaction;
+struct Vessel;
+
+// Visitor interface for traversing a reaction network.
+// Concrete visitors override visit() for the elements they care about.
+struct Visitor
 {
-    // Forward declarations
-    struct PartialReaction;
-    struct Reactant;
-    struct ReactantList;
-    struct Reaction;
-    struct Vessel;
+    virtual void visit(const Reactant&) = 0;
+    virtual void visit(const Reaction&) = 0;
+    virtual void visit(const Vessel&) = 0;
 
-    /** Visitor interface for the visitor pattern */
-    struct Visitor
-    {
-        virtual void visit(const PartialReaction) = 0;
-        virtual void visit(const Reactant) = 0;
-        virtual void visit(const ReactantList) = 0;
-        virtual void visit(const Reaction) = 0;
-        virtual void visit(const Vessel) = 0;
+    virtual ~Visitor() noexcept = default;
+};
 
-        virtual ~Visitor() noexcept = default;
-    };
-}
+}  // namespace stochastic
 
-#endif //MINIPROJECT_VISITOR_HPP
+#endif  // MINIPROJECT_VISITOR_HPP

@@ -1,38 +1,42 @@
 #ifndef MINIPROJECT_PRINTER_HPP
 #define MINIPROJECT_PRINTER_HPP
 
+#include "symbol_table.hpp"
+#include "visitor.hpp"
+
+#include <cstddef>
 #include <ostream>
-#include <visitor.hpp>
+#include <string>
 
-namespace stochastic
+namespace stochastic {
+
+struct Reactant;
+struct Reaction;
+struct Vessel;
+
+// A Visitor that emits the reaction network in Graphviz `dot` format.
+// Species become cyan boxes (s0, s1, ...)
+// Reactions become yellow ovals (r0, r1, ...) labelled with their rate.
+// Catalysts (species that appear on both sides of a reaction) get an `arrowhead="tee"`
+// edge instead of a pair of in/out edge
+//
+// Usage:
+//     Printer{std::cout}.visit(vessel);
+//
+struct Printer : Visitor
 {
-    struct PartialReaction;
-    struct Reactant;
-    struct ReactantList;
-    struct Reaction;
-    struct Vessel;
+    explicit Printer(std::ostream& os);
 
-    struct Printer : Visitor
-    {
-        std::ostream& os;
-        const symbol_table_t& symbols;
+    void visit(const Reactant& r) override;
+    void visit(const Reaction& r) override;
+    void visit(const Vessel& v) override;
 
-        Printer(std::ostream& os, const symbol_table_t& symbols);
+private:
+    std::ostream& _os;
+    SymbolTable<std::string, std::size_t> _species_id;  // species name -> s<i> id
+    std::size_t _reaction_counter{0};                   // next r<i> id
+};
 
-        void visit(const const_t& c) override;
-        void visit(const var_t& v) override;
-        void visit(const unary_t& u) override;
-        void visit(const binary_t& b) override;
-        void visit(const assign_t& a) override;
-        void visit(const expr_t& e) override;
-    };
+}  // namespace stochastic
 
-    struct PrintTerm {
-        const term_t& term;
-        const symbol_table_t& symbols;
-    };
-
-    std::ostream& operator<<(std::ostream& os, const PrintTerm& pt);
-}
-
-#endif //MINIPROJECT_PRINTER_HPP
+#endif  // MINIPROJECT_PRINTER_HPP

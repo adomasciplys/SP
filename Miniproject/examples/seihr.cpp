@@ -1,3 +1,4 @@
+#include "printer.hpp"
 #include "vessel.hpp"
 
 #include <cmath>
@@ -5,6 +6,7 @@
 #include <iostream>
 #include <string>
 
+using stochastic::Printer;
 using stochastic::Vessel;
 
 // SEIHR model for COVID-19 - Listing 2
@@ -61,6 +63,9 @@ static void dump(const Vessel& v)
 
 int main()
 {
-    dump(seihr(10000));
+    const auto v = seihr(10000);
+    dump(v);
+    std::cout << "\n";
+    Printer{std::cout}.visit(v);
     return 0;
 }
