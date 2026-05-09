@@ -31,4 +31,10 @@ const Reactant& Vessel::find(const std::string& name) const
     return _species.at(_index.lookup(name));
 }
 
+std::size_t Vessel::find_index(const std::string& name) const
+{
+    // Symbol table throws std::out_of_range if `name` is not registered.
+    return _index.lookup(name);
+}
+
 }  // namespace stochastic

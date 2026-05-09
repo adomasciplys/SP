@@ -38,6 +38,7 @@ struct Vessel
     // Look up a previously-added species by name.
     // Throws std::out_of_range if the name was never registered.
     [[nodiscard]] const Reactant& find(const std::string& name) const;
+    [[nodiscard]] std::size_t find_index(const std::string& name) const;
 
     // Read-only views used by the simulator and the graph-printing visitor.
     [[nodiscard]] const std::vector<Reactant>& species() const noexcept { return _species; }
