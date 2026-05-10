@@ -1,10 +1,12 @@
 #include "printer.hpp"
+#include "simulator.hpp"
 #include "vessel.hpp"
 
 #include <cstddef>
 #include <iostream>
 
 using stochastic::Printer;
+using stochastic::Simulator;
 using stochastic::Vessel;
 
 // Genetic oscillator for circadian rhythm - Listing 1
@@ -57,31 +59,11 @@ static Vessel circadian_rhythm()
     return v;
 }
 
-static void dump(const Vessel& v)
-{
-    std::cout << "Vessel: " << v.name() << "\n";
-    std::cout << "Species (" << v.species().size() << "):\n";
-    for (const auto& s : v.species())
-        std::cout << "  " << s.name << " = " << s.initial_count << "\n";
-
-    std::cout << "Reactions (" << v.reactions().size() << "):\n";
-    for (const auto& r : v.reactions()) {
-        for (std::size_t i = 0; i < r.inputs.items.size(); ++i)
-            std::cout << (i ? " + " : "") << r.inputs.items[i].name;
-        std::cout << " --(" << r.rate << ")--> ";
-        for (std::size_t i = 0; i < r.products.items.size(); ++i) {
-            const auto& p = r.products.items[i];
-            std::cout << (i ? " + " : "") << (p.is_environment() ? "env" : p.name);
-        }
-        std::cout << "\n";
-    }
-}
-
 int main()
 {
     const auto v = circadian_rhythm();
-    dump(v);
-    std::cout << "\n";
     Printer{std::cout}.visit(v);
+    Simulator sim{v, 42};
+    sim.simulate(48.0);  // 48 hours, matches Figure 2
     return 0;
 }
