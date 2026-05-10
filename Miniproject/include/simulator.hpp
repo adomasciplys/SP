@@ -5,22 +5,22 @@
 #include <vector>
 #include <random>
 #include <algorithm>
+#include <limits>
 
 namespace stochastic
 {
     struct Simulator
     {
-        Vessel& vessel;
         double t = 0;
-        // Parallel to vessel.species() (so counts[i] is the current count of species i)
-        std::vector<std::size_t> counts;
-        std::vector<double> delays; // Parallel to vessel.reactions()
-        std::mt19937 generator;
 
-        Simulator(Vessel& vessel, std::size_t seed) : vessel(vessel),
-                                                      counts(std::vector<std::size_t>(vessel.species().size(), 0)),
-                                                      delays(std::vector<double>(vessel.reactions().size(), 0)),
-                                                      generator(seed)
+        // Parallel to vessel.species()
+        // Holds the amount of each input and output reactant
+        std::vector<std::size_t> counts;
+
+        Simulator(const Vessel& vessel, std::size_t seed) : vessel(vessel),
+                                                            counts(std::vector<std::size_t>(vessel.species().size(), 0)),
+                                                            delays(std::vector<double>(vessel.reactions().size(), 0)),
+                                                            generator(seed)
         {
         }
 
@@ -31,27 +31,36 @@ namespace stochastic
                 compute_delays(); // // foreach r ∈ R do Compute r.delay;
                 // r∶= argminr∈R r.delay;
                 auto it_r_min = std::min_element(delays.begin(), delays.end());
-                if (it_r_min == delays.end()) break;
-                std::size_t idx = std::distance(delays.begin(), it_r_min); // index of chosen reaction
-                const Reaction& fired_reaction = vessel.reactions().at(idx);
+                std::size_t idx = std::distance(delays.begin(), it_r_min); // index of fired reaction
+                const Reaction& fired_reaction = vessel.reactions()[idx];
 
                 // t∶= t + r.delay;
-                t += delays.at(idx);
+                t += delays[idx];
 
-
+                if (check_if_enough_input_reactants(fired_reaction))
+                {
+                    update_counts(fired_reaction);
+                }
+                // TODO: Print/store/observe the state ⟨Qi⟩;
             }
         }
 
         void compute_delays()
         {
             const auto& reactions = vessel.reactions();
-            const auto& species = vessel.species();
-            std::size_t i = 0;
-            for (const Reaction& reaction : reactions)
+            for (std::size_t i = 0; i < reactions.size(); ++i)
             {
-                std::exponential_distribution<> distribution(reaction.rate * input_product(reaction.inputs));
-                delays[i] =  distribution(generator);
-                ++i;
+                const Reaction& reaction = reactions[i];
+                const double lambda = reaction.rate * input_product(reaction.inputs);
+                // exponential_distribution{0} is UB; an unfireable reaction
+                // gets an "infinite" delay so min_element naturally skips it.
+                if (lambda == 0.0)
+                {
+                    delays[i] = std::numeric_limits<double>::infinity();
+                    continue;
+                }
+                std::exponential_distribution<> distribution(lambda);
+                delays[i] = distribution(generator);
             }
         }
 
@@ -67,6 +76,41 @@ namespace stochastic
             return product;
         };
 
+        [[nodiscard]] bool check_if_enough_input_reactants(const Reaction& reaction) const
+        {
+            // Decrement a working copy as we go
+            auto remaining = counts;
+            for (const auto& reactant : reaction.inputs.items)
+            {
+                if (reactant.is_environment()) continue;
+                const auto idx = vessel.find_index(reactant.name);
+                if (remaining[idx] == 0) return false;
+                --remaining[idx];
+            }
+            return true;
+        }
+
+        void update_counts(const Reaction& reaction)
+        {
+            for (const auto& reactant : reaction.inputs.items)
+            {
+                if (reactant.is_environment()) continue;
+                auto idx = vessel.find_index(reactant.name);
+                counts[idx]--; // Use inputs
+            }
+
+            for (const auto& reactant : reaction.products.items)
+            {
+                if (reactant.is_environment()) continue;
+                auto idx = vessel.find_index(reactant.name);
+                counts[idx]++; // Increment products
+            }
+        }
+
+    private:
+        Vessel& vessel;
+        std::vector<double> delays; // Parallel to vessel.reactions()
+        std::mt19937 generator;
     };
 }
 
