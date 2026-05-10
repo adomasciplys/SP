@@ -104,8 +104,8 @@ struct Generator
         void operator++(int) { ++(*this); }
 
         // Reads the generated value from the promise
-        reference operator*() const noexcept { return handle.promise().current_value; }
-        pointer operator->() const noexcept { return &handle.promise().current_value; }
+        reference operator*() const noexcept { return handle.promise().value(); }
+        pointer operator->() const noexcept { return &handle.promise().value(); }
 
         // End condition
         bool operator==(std::default_sentinel_t) const noexcept
