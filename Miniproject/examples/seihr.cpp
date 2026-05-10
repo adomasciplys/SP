@@ -2,7 +2,9 @@
 #include "simulator.hpp"
 #include "vessel.hpp"
 
+#include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <string>
@@ -47,7 +49,13 @@ int main()
 {
     const auto v = seihr(10000);
     Printer{std::cout}.visit(v);
+
+    // Stream the trajectory and track only the peak hospitalization
     Simulator sim{v, 42};
-    sim.simulate(100.0);  // 100 days, matches Figure 3
+    const auto h_idx = v.find_index("H");
+    std::size_t peak_H = 0;
+    for (const auto& s : sim.run(100.0))
+        peak_H = std::max(peak_H, s.counts[h_idx]);
+    std::cerr << "Peak hospitalization (N=10000): " << peak_H << '\n';
     return 0;
 }
