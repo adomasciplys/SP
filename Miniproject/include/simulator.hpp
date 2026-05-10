@@ -2,11 +2,10 @@
 #define MINIPROJECT_SIMULATOR_HPP
 
 #include "vessel.hpp"
-#include <vector>
+
+#include <cstddef>
 #include <random>
-#include <algorithm>
-#include <limits>
-#include <numeric>
+#include <vector>
 
 namespace stochastic
 {
@@ -15,99 +14,31 @@ namespace stochastic
     // independent simulations can run against the same Vessel concurrently.
     struct Simulator
     {
-        Simulator(const Vessel& vessel, std::size_t seed)
-            : vessel(vessel),
-              state(vessel.species().size()),
-              delays(vessel.reactions().size()),
-              generator(seed)
-        {
-            // `state` is seeded from each species' initial_count.
-            std::ranges::transform(vessel.species(), state.begin(),
-                                   [](const Reactant& r) { return r.initial_count; });
-        }
+        Simulator(const Vessel& vessel, std::size_t seed);
 
         // Run Algorithm 1 forward until t >= end_time.
-        void simulate(double end_time)
-        {
-            while (t < end_time) step();
-        }
+        void simulate(double end_time);
 
         // One iteration of Algorithm 1.
         // The firing of the chosen reaction is gated on having enough of each input species available.
-        void step()
-        {
-            // Line 3: foreach r ∈ R do Compute r.delay;
-            compute_delays();
-
-            // Line 4: r∶= argminr∈R r.delay;
-            const std::size_t idx = std::distance(
-                delays.begin(), std::ranges::min_element(delays));
-            const Reaction& fired_reaction = vessel.reactions()[idx];
-
-            // Line 5: t∶= t + r.delay;
-            t += delays[idx];
-
-            // Line 6: only apply the firing when every input is present.
-            if (can_fire(fired_reaction))
-            {
-                // Line 8-9: decrement inputs, increment products.
-                update_counts(fired_reaction);
-            }
-            // TODO: Print/store/observe the state ⟨Qi⟩;
-        }
+        void step();
 
         [[nodiscard]] double time() const noexcept { return t; }
         [[nodiscard]] const std::vector<std::size_t>& counts() const noexcept { return state; }
 
     private:
         // Use Equation 1, to compute the delays for each reaction
-        void compute_delays()
-        {
-            std::ranges::transform(vessel.reactions(), delays.begin(),
-                [&](const Reaction& r) -> double {
-                    const double lambda = r.rate * input_product(r.inputs);
-                    if (lambda == 0.0) return std::numeric_limits<double>::infinity();
-                    std::exponential_distribution<> dist(lambda);
-                    return dist(generator);
-                });
-        }
+        void compute_delays();
 
         // Helper to find ∏i ∈ r.inputs Qi
-        [[nodiscard]] std::size_t input_product(const ReactantList& inputs) const
-        {
-            return std::accumulate(inputs.items.begin(), inputs.items.end(), std::size_t{1},
-                [&](std::size_t acc, const Reactant& r) {
-                    return r.is_environment() ? acc : acc * state[vessel.find_index(r.name)];
-                });
-        }
+        [[nodiscard]] std::size_t input_product(const ReactantList& inputs) const;
 
         // True iff every (non-env) input has enough of its species to fire.
-        [[nodiscard]] bool can_fire(const Reaction& reaction) const
-        {
-            auto remaining = state;
-            for (const auto& reactant : reaction.inputs.items)
-            {
-                if (reactant.is_environment()) continue;
-                const auto idx = vessel.find_index(reactant.name);
-                if (remaining[idx] == 0) return false;
-                --remaining[idx];
-            }
-            return true;
-        }
+        [[nodiscard]] bool can_fire(const Reaction& reaction) const;
 
         // Apply a fired reaction: -1 per input, +1 per product.
         // Environment reactants (∅) carry no count and are skipped on either side.
-        void update_counts(const Reaction& reaction)
-        {
-            auto apply_delta = [&](const ReactantList& list, int delta) {
-                for (const auto& r : list.items) {
-                    if (r.is_environment()) continue;
-                    state[vessel.find_index(r.name)] += delta;
-                }
-            };
-            apply_delta(reaction.inputs,   -1);
-            apply_delta(reaction.products, +1);
-        }
+        void update_counts(const Reaction& reaction);
 
         const Vessel& vessel;        // Shared, immutable: rules + symbol table.
         double t = 0;                // Simulation time, advanced by each delay.

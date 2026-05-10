@@ -9,7 +9,8 @@ add_library(stochastic STATIC
     source/partial_reaction.cpp
     source/reaction.cpp
     source/vessel.cpp
-    source/printer.cpp)
+    source/printer.cpp
+    source/simulator.cpp)
 
 include(cmake/doctest.cmake)
 
