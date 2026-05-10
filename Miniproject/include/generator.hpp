@@ -68,17 +68,14 @@ struct Generator
 
     // Transfers ownership of the handle from 'other' to this generator
     Generator(Generator&& other) noexcept
-        : _handle(std::exchange(other._handle, {})) {}
+    {
+        std::swap(_handle, other._handle);
+    }
 
     // Cleans up existing memory, then transfers ownership
     Generator& operator=(Generator&& other) noexcept
     {
-        if (this != &other) {
-            // Destroy the current coroutine state to prevent memory leaks.
-            if (_handle) _handle.destroy();
-            // Steal the handle from 'other' and leave 'other' empty.
-            _handle = std::exchange(other._handle, {});
-        }
+        std::swap(_handle, other._handle);
         return *this;
     }
     ~Generator() { if (_handle) _handle.destroy(); }
@@ -93,25 +90,30 @@ struct Generator
         using difference_type = std::ptrdiff_t;
         using iterator_category = std::input_iterator_tag;
 
-        Handle handle{};
+        iterator() = default;
+        explicit iterator(Handle h) noexcept : _handle{h} {}
 
         // Unpauses the coroutine to calculate the next value
         iterator& operator++()
         {
-            if (handle && !handle.done()) handle.resume();
+            if (_handle && !_handle.done()) _handle.resume();
             return *this;
         }
         void operator++(int) { ++(*this); }
 
         // Reads the generated value from the promise
-        reference operator*() const noexcept { return handle.promise().value(); }
-        pointer operator->() const noexcept { return &handle.promise().value(); }
+        reference operator*() const noexcept { return _handle.promise().value(); }
+        pointer operator->() const noexcept { return &_handle.promise().value(); }
 
         // End condition
+        bool operator==(const iterator&) const noexcept = default;
         bool operator==(std::default_sentinel_t) const noexcept
         {
-            return !handle || handle.done();
+            return !_handle || _handle.done();
         }
+
+    private:
+        Handle _handle{};
     };
 
     // Range functions required by C++ to start and stop the loop.
@@ -124,7 +126,7 @@ struct Generator
     }
 
     // Returns a generic "end" marker that operator== will check against
-    std::default_sentinel_t end() const noexcept { return {}; }
+    static std::default_sentinel_t end() noexcept { return {}; }
 
 private:
     Handle _handle{};
