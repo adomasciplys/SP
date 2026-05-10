@@ -1,6 +1,7 @@
 #ifndef MINIPROJECT_SIMULATOR_HPP
 #define MINIPROJECT_SIMULATOR_HPP
 
+#include "generator.hpp"
 #include "vessel.hpp"
 
 #include <cstddef>
@@ -14,10 +15,21 @@ namespace stochastic
     // independent simulations can run against the same Vessel concurrently.
     struct Simulator
     {
+        // One trajectory point: time + a snapshot of all species counts.
+        struct Sample
+        {
+            double time;
+            std::vector<std::size_t> counts;
+        };
+
         Simulator(const Vessel& vessel, std::size_t seed);
 
         // Run Algorithm 1 forward until t >= end_time.
         void simulate(double end_time);
+
+        // Lazy trajectory: yields the initial state
+        // Then one Sample after every successful step, until t >= end_time.
+        Generator<Sample> run(double end_time);
 
         // One iteration of Algorithm 1.
         // The firing of the chosen reaction is gated on having enough of each input species available.

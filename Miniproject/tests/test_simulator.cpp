@@ -149,6 +149,54 @@ TEST_CASE("Simulator: simulate(end_time) terminates with time() >= end_time")
     CHECK(sim.time() >= 10.0);
 }
 
+TEST_CASE("Simulator: run() yields the initial state, then one Sample per step")
+{
+    Vessel v{"v"};
+    const auto A = v.add("A", 3);
+    const auto B = v.add("B", 0);
+    v.add(A >> 1.0 >>= B);
+
+    Simulator sim{v, 42};
+
+    std::vector<Simulator::Sample> samples;
+    for (const auto& s : sim.run(100.0))
+        samples.push_back(s);
+
+    // Initial sample + one per A-to-B firing (3 firings) = 4 samples.
+    // After A is depleted, the trajectory ends (no more events possible).
+    REQUIRE(samples.size() == 4);
+
+    CHECK(samples[0].time == doctest::Approx(0.0));
+    CHECK(samples[0].counts[0] == 3);
+    CHECK(samples[0].counts[1] == 0);
+
+    // Time strictly increases.
+    for (std::size_t i = 1; i < samples.size(); ++i)
+        CHECK(samples[i].time > samples[i - 1].time);
+
+    // Final sample: all A consumed, all became B.
+    CHECK(samples.back().counts[0] == 0);
+    CHECK(samples.back().counts[1] == 3);
+}
+
+TEST_CASE("Simulator: run() can be consumed without storing the whole trajectory")
+{
+    // The exact use-case the assignment calls out: track a single statistic
+    // (here, the maximum count of B) without holding the trajectory in memory.
+    Vessel v{"v"};
+    const auto A = v.add("A", 50);
+    const auto B = v.add("B", 0);
+    v.add(A >> 1.0 >>= B);
+
+    Simulator sim{v, 42};
+
+    std::size_t peak_B = 0;
+    for (const auto& s : sim.run(1000.0))
+        peak_B = std::max(peak_B, s.counts[1]);
+
+    CHECK(peak_B == 50);  // mass conservation: peak B equals initial A
+}
+
 TEST_CASE("Simulator: depleted input stops one reaction but not others")
 {
     Vessel v{"v"};

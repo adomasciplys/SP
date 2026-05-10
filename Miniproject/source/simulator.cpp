@@ -1,6 +1,7 @@
 #include "simulator.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <iterator>
 #include <limits>
 #include <numeric>
@@ -21,6 +22,17 @@ namespace stochastic
     void Simulator::simulate(double end_time)
     {
         while (t < end_time) step();
+    }
+
+    Generator<Simulator::Sample> Simulator::run(double end_time)
+    {
+        co_yield Sample{time(), counts()};  // initial state at t = 0
+        while (t < end_time)
+        {
+            step();
+            if (!std::isfinite(t)) break;
+            co_yield Sample{time(), counts()};
+        }
     }
 
     void Simulator::step()
