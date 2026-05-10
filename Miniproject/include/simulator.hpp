@@ -15,15 +15,9 @@ namespace stochastic
     // independent simulations can run against the same Vessel concurrently.
     struct Simulator
     {
-        double t = 0;  // Simulation time, advanced by each delay.
-
-        // Live species counts. Parallel to vessel.species()
-        // state[i] is the current count of the i-th species
-        std::vector<std::size_t> state;
-
         Simulator(const Vessel& vessel, std::size_t seed)
-            : state(vessel.species().size()),
-              vessel(vessel),
+            : vessel(vessel),
+              state(vessel.species().size()),
               delays(vessel.reactions().size()),
               generator(seed)
         {
@@ -33,33 +27,39 @@ namespace stochastic
         }
 
         // Run Algorithm 1 forward until t >= end_time.
-        // Time always advances on each step
-        // The firing of the chosen reaction is gated on having enough of each input species available.
         void simulate(double end_time)
         {
-            while (t < end_time)
-            {
-                // Line 3: foreach r ∈ R do Compute r.delay;
-                compute_delays();
-
-                // Line 4: r∶= argminr∈R r.delay;
-                const auto it_r_min = std::ranges::min_element(delays);
-                const std::size_t idx = std::distance(delays.begin(), it_r_min); // index of fired reaction
-                const Reaction& fired_reaction = vessel.reactions()[idx];
-
-                // Line 5: t∶= t + r.delay;
-                t += delays[idx];
-
-                // Line 6: only apply the firing when every input is present.
-                if (check_if_enough_input_reactants(fired_reaction))
-                {
-                    // Line 8-9: decrement inputs, increment products.
-                    update_counts(fired_reaction);
-                }
-                // TODO: Print/store/observe the state ⟨Qi⟩;
-            }
+            while (t < end_time) step();
         }
 
+        // One iteration of Algorithm 1.
+        // The firing of the chosen reaction is gated on having enough of each input species available.
+        void step()
+        {
+            // Line 3: foreach r ∈ R do Compute r.delay;
+            compute_delays();
+
+            // Line 4: r∶= argminr∈R r.delay;
+            const std::size_t idx = std::distance(
+                delays.begin(), std::ranges::min_element(delays));
+            const Reaction& fired_reaction = vessel.reactions()[idx];
+
+            // Line 5: t∶= t + r.delay;
+            t += delays[idx];
+
+            // Line 6: only apply the firing when every input is present.
+            if (can_fire(fired_reaction))
+            {
+                // Line 8-9: decrement inputs, increment products.
+                update_counts(fired_reaction);
+            }
+            // TODO: Print/store/observe the state ⟨Qi⟩;
+        }
+
+        [[nodiscard]] double time() const noexcept { return t; }
+        [[nodiscard]] const std::vector<std::size_t>& counts() const noexcept { return state; }
+
+    private:
         // Use Equation 1, to compute the delays for each reaction
         void compute_delays()
         {
@@ -82,7 +82,7 @@ namespace stochastic
         }
 
         // True iff every (non-env) input has enough of its species to fire.
-        [[nodiscard]] bool check_if_enough_input_reactants(const Reaction& reaction) const
+        [[nodiscard]] bool can_fire(const Reaction& reaction) const
         {
             auto remaining = state;
             for (const auto& reactant : reaction.inputs.items)
@@ -109,8 +109,11 @@ namespace stochastic
             apply_delta(reaction.products, +1);
         }
 
-    private:
         const Vessel& vessel;        // Shared, immutable: rules + symbol table.
+        double t = 0;                // Simulation time, advanced by each delay.
+        // Live species counts. Parallel to vessel.species()
+        // state[i] is the current count of the i-th species
+        std::vector<std::size_t> state;
         std::vector<double> delays;  // Parallel to vessel.reactions()
         std::mt19937 generator;      // Owned per Simulator so parallel runs don't share state.
     };
