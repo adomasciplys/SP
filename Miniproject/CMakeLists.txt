@@ -17,6 +17,9 @@ include(cmake/doctest.cmake)
 target_include_directories(stochastic PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 # Example programs.
+add_executable(figure1 examples/figure1.cpp)
+target_link_libraries(figure1 PRIVATE stochastic)
+
 add_executable(seihr examples/seihr.cpp)
 target_link_libraries(seihr PRIVATE stochastic)
 
