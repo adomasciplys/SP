@@ -10,12 +10,15 @@
 
 namespace stochastic
 {
+    // Stochastic simulator (Algorithm 1)
+    // Borrows an immutable Vessel and owns the state + RNG, so
+    // independent simulations can run against the same Vessel concurrently.
     struct Simulator
     {
-        double t = 0;
+        double t = 0;  // Simulation time, advanced by each delay.
 
-        // Parallel to vessel.species()
-        // Holds the amount of each input and output reactant
+        // Live species counts. Parallel to vessel.species()
+        // state[i] is the current count of the i-th species
         std::vector<std::size_t> state;
 
         Simulator(const Vessel& vessel, std::size_t seed)
@@ -24,11 +27,14 @@ namespace stochastic
               delays(vessel.reactions().size()),
               generator(seed)
         {
-            // Seed each species' count from its declared initial_count.
+            // `state` is seeded from each species' initial_count.
             std::ranges::transform(vessel.species(), state.begin(),
                                    [](const Reactant& r) { return r.initial_count; });
         }
 
+        // Run Algorithm 1 forward until t >= end_time.
+        // Time always advances on each step
+        // The firing of the chosen reaction is gated on having enough of each input species available.
         void simulate(double end_time)
         {
             while (t < end_time)
@@ -44,16 +50,17 @@ namespace stochastic
                 // Line 5: t∶= t + r.delay;
                 t += delays[idx];
 
-                // Line 6
+                // Line 6: only apply the firing when every input is present.
                 if (check_if_enough_input_reactants(fired_reaction))
                 {
-                    // Line 8-9
+                    // Line 8-9: decrement inputs, increment products.
                     update_counts(fired_reaction);
                 }
                 // TODO: Print/store/observe the state ⟨Qi⟩;
             }
         }
 
+        // Use Equation 1, to compute the delays for each reaction
         void compute_delays()
         {
             std::ranges::transform(vessel.reactions(), delays.begin(),
@@ -65,6 +72,7 @@ namespace stochastic
                 });
         }
 
+        // Helper to find ∏i ∈ r.inputs Qi
         [[nodiscard]] std::size_t input_product(const ReactantList& inputs) const
         {
             return std::accumulate(inputs.items.begin(), inputs.items.end(), std::size_t{1},
@@ -73,9 +81,9 @@ namespace stochastic
                 });
         }
 
+        // True iff every (non-env) input has enough of its species to fire.
         [[nodiscard]] bool check_if_enough_input_reactants(const Reaction& reaction) const
         {
-            // Decrement a working copy as we go
             auto remaining = state;
             for (const auto& reactant : reaction.inputs.items)
             {
@@ -87,6 +95,8 @@ namespace stochastic
             return true;
         }
 
+        // Apply a fired reaction: -1 per input, +1 per product.
+        // Environment reactants (∅) carry no count and are skipped on either side.
         void update_counts(const Reaction& reaction)
         {
             auto apply_delta = [&](const ReactantList& list, int delta) {
@@ -100,9 +110,9 @@ namespace stochastic
         }
 
     private:
-        const Vessel& vessel;
-        std::vector<double> delays; // Parallel to vessel.reactions()
-        std::mt19937 generator;
+        const Vessel& vessel;        // Shared, immutable: rules + symbol table.
+        std::vector<double> delays;  // Parallel to vessel.reactions()
+        std::mt19937 generator;      // Owned per Simulator so parallel runs don't share state.
     };
 }
 
