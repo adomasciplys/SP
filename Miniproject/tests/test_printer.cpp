@@ -13,7 +13,8 @@ namespace {
 std::string dot_of(const Vessel& v)
 {
     std::ostringstream os;
-    Printer{os}.visit(v);
+    Printer printer{os};
+    v.accept(printer);
     return os.str();
 }
 }  // namespace

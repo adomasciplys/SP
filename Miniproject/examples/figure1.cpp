@@ -19,8 +19,9 @@ static void run_config(std::size_t a0, std::size_t b0, std::size_t c0,
 
 int main()
 {
-    // Print the network structure once — all three configs share the same one.
-    Printer{std::cout}.visit(make_figure1(100, 0, 1));
+    // Print the network structure once
+    Printer printer{std::cout};
+    make_figure1(100, 0, 1).accept(printer);
 
     run_config(100,  0, 1, 2000.0, 42);
     run_config(100,  0, 2, 1500.0, 42);

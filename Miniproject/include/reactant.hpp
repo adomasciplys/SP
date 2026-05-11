@@ -1,6 +1,8 @@
 #ifndef MINIPROJECT_REACTANT_HPP
 #define MINIPROJECT_REACTANT_HPP
 
+#include "visitor.hpp"
+
 #include <cstddef>
 #include <string>
 
@@ -16,6 +18,8 @@ struct Reactant
     std::size_t initial_count{0};
 
     [[nodiscard]] bool is_environment() const noexcept { return name.empty(); }
+
+    void accept(Visitor& v) const { v.visit(*this); }
 };
 
 }  // namespace stochastic

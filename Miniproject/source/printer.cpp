@@ -73,10 +73,10 @@ void Printer::visit(const Vessel& v)
     }
 
     for (const auto& s : v.species())
-        visit(s);
+        s.accept(*this);
 
     for (const auto& r : v.reactions())
-        visit(r);
+        r.accept(*this);
 
     _os << "}\n";
 }

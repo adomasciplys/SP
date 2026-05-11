@@ -4,6 +4,7 @@
 #include "reactant.hpp"
 #include "reaction.hpp"
 #include "symbol_table.hpp"
+#include "visitor.hpp"
 
 #include <cstddef>
 #include <string>
@@ -43,6 +44,8 @@ struct Vessel
     // Read-only views used by the simulator and the graph-printing visitor.
     [[nodiscard]] const std::vector<Reactant>& species() const noexcept { return _species; }
     [[nodiscard]] const std::vector<Reaction>& reactions() const noexcept { return _reactions; }
+
+    void accept(Visitor& v) const { v.visit(*this); }
 
 private:
     std::string _name;

@@ -4,6 +4,7 @@
 #include "partial_reaction.hpp"
 #include "reactant.hpp"
 #include "reactant_list.hpp"
+#include "visitor.hpp"
 
 namespace stochastic {
 
@@ -22,6 +23,8 @@ struct Reaction
     ReactantList inputs;
     ReactantList products;
     double rate;
+
+    void accept(Visitor& v) const { v.visit(*this); }
 };
 
 // `... >>= X`        -> single product on the right-hand side.

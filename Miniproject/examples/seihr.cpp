@@ -27,7 +27,8 @@ static std::size_t peak_hospitalization(std::uint32_t N, std::size_t seed)
 int main()
 {
     // Print the network once — its shape is the same for every N.
-    Printer{std::cout}.visit(make_seihr(10000));
+    Printer printer{std::cout};
+    make_seihr(10000).accept(printer);
 
     // Peaks go to stderr so stdout stays a clean dot stream.
     std::cerr << "Peak hospitalization (N=10000):       "
