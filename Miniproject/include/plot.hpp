@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace stochastic
+namespace plot
 {
 
 // One labeled line in a multi-series line plot.
@@ -28,6 +28,6 @@ void save_trajectory_plot(const std::string& filename,
                           const std::vector<PlotSeries>& series,
                           std::size_t max_points = 10000);
 
-}  // namespace stochastic
+}  // namespace plot
 
 #endif  // MINIPROJECT_PLOT_HPP

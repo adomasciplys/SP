@@ -8,8 +8,9 @@
 #include <cstdint>
 #include <string>
 
-namespace stochastic::examples
+namespace examples
 {
+using stochastic::Vessel;
 
 // Figure 1 from the assignment: the toy reaction
 //     A + C --(lambda)--> B + C
@@ -106,6 +107,6 @@ inline Vessel make_circadian()
     return v;
 }
 
-}  // namespace stochastic::examples
+}  // namespace examples
 
 #endif  // MINIPROJECT_EXAMPLES_NETWORKS_HPP

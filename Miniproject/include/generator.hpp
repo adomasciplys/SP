@@ -6,12 +6,10 @@
 #include <optional>
 #include <utility>
 
-namespace stochastic
-{
-    // A coroutine wrapper that produces a sequence of values lazily.
-    // Functions returning this type can use `co_yield` to return values one at a time.
-    // The coroutine pauses execution after each `co_yield`
-    // Only calculates the next value when the caller requests it
+// A coroutine wrapper that produces a sequence of values lazily.
+// Functions returning this type can use `co_yield` to return values one at a time.
+// The coroutine pauses execution after each `co_yield`
+// Only calculates the next value when the caller requests it
 template <std::movable T>
 struct Generator
 {
@@ -131,7 +129,5 @@ struct Generator
 private:
     Handle _handle{};
 };
-
-}  // namespace stochastic
 
 #endif  // MINIPROJECT_GENERATOR_HPP

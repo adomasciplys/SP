@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
-using stochastic::PlotSeries;
+using plot::PlotSeries;
+using plot::save_trajectory_plot;
 using stochastic::Simulator;
-using stochastic::examples::make_circadian;
-using stochastic::save_trajectory_plot;
+using examples::make_circadian;
 
 int main()
 {

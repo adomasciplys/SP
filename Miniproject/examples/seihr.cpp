@@ -9,7 +9,7 @@
 
 using stochastic::Printer;
 using stochastic::Simulator;
-using stochastic::examples::make_seihr;
+using examples::make_seihr;
 
 // Build the network for the given population, stream the trajectory
 // and keep only the peak hospitalization.

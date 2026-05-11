@@ -6,7 +6,7 @@
 
 using stochastic::Printer;
 using stochastic::Simulator;
-using stochastic::examples::make_circadian;
+using examples::make_circadian;
 
 int main()
 {

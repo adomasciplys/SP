@@ -13,7 +13,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace stochastic
+namespace plot
 {
 
 namespace
@@ -109,4 +109,4 @@ void save_trajectory_plot(const std::string& filename,
     img.save(QString::fromStdString(filename));
 }
 
-}  // namespace stochastic
+}  // namespace plot

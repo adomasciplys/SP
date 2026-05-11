@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 
-using stochastic::PlotSeries;
+using plot::PlotSeries;
+using plot::save_trajectory_plot;
 using stochastic::Simulator;
 using stochastic::Vessel;
-using stochastic::examples::make_figure1;
-using stochastic::save_trajectory_plot;
+using examples::make_figure1;
 
 static void run_and_plot(const std::string& filename, const std::string& title,
                          std::size_t a0, std::size_t b0, std::size_t c0,

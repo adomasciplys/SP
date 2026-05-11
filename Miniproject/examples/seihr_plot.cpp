@@ -5,10 +5,10 @@
 #include <cstddef>
 #include <vector>
 
-using stochastic::PlotSeries;
+using plot::PlotSeries;
+using plot::save_trajectory_plot;
 using stochastic::Simulator;
-using stochastic::examples::make_seihr;
-using stochastic::save_trajectory_plot;
+using examples::make_seihr;
 
 int main()
 {
@@ -22,9 +22,7 @@ int main()
         S.push_back(static_cast<double>(s.counts[0]));
         E.push_back(static_cast<double>(s.counts[1]));
         I.push_back(static_cast<double>(s.counts[2]));
-        // Scale H by 1000 — its absolute count peaks ~2 at N=10000, otherwise
-        // invisible against S which peaks near N. Matches the assignment's
-        // Figure 3 ("H*1000" legend entry).
+        // Scale H by 1000
         H_scaled.push_back(static_cast<double>(s.counts[3]) * 1000.0);
         R.push_back(static_cast<double>(s.counts[4]));
     }

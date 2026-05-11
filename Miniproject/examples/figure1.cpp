@@ -7,7 +7,7 @@
 
 using stochastic::Printer;
 using stochastic::Simulator;
-using stochastic::examples::make_figure1;
+using examples::make_figure1;
 
 static void run_config(std::size_t a0, std::size_t b0, std::size_t c0,
                        double end_time, std::size_t seed)
