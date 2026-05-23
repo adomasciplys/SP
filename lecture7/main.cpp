@@ -2,6 +2,39 @@
 #include <iostream>
 #include <list>
 #include <vector>
+#include <type_traits>
+#include <utility>
+#include <iterator>
+#include <string>
+#include <array>
+
+// Primary template: assume false
+template <typename T, typename = void>
+struct is_container : std::false_type {};
+
+// Specialized when required expressions/types exist
+template <typename T>
+struct is_container<T, std::void_t<
+    typename T::value_type,
+    decltype(std::begin(std::declval<T&>())),
+    decltype(std::end(std::declval<T&>()))
+>> : std::true_type {};
+
+template <typename T>
+inline constexpr bool is_container_v = is_container<T>::value;
+
+// Compile-time tests
+static_assert(is_container_v<std::vector<int>>);
+static_assert(is_container_v<std::list<double>>);
+static_assert(is_container_v<std::array<int, 3>>);
+
+// Depending on your assignment rule, you likely want this:
+static_assert(!is_container_v<int>);
+static_assert(!is_container_v<const char*>);
+
+// NOTE: std::string *is* a container by this definition
+static_assert(is_container_v<std::string>);
+
 
 void print(std::vector<int> v)
 {
