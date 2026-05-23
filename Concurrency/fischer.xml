@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
+<nta>
+	<declaration>// Fischer's mutual exclusion protocol.
+
+typedef int[1,6] id_t;
+int id;</declaration>
+	<template>
+		<name x="16" y="-8">P</name>
+		<parameter>const id_t pid</parameter>
+		<declaration>clock x;
+const int DELAY = 2;</declaration>
+		<location id="id0" x="216" y="176">
+			<name x="238" y="170">Wait</name>
+		</location>
+		<location id="id1" x="216" y="48">
+			<name x="236" y="19">Request</name>
+			<label kind="invariant" x="238" y="34">x&lt;=DELAY</label>
+		</location>
+		<location id="id2" x="64" y="48">
+			<name x="34" y="17">Idle</name>
+		</location>
+		<location id="id3" x="64" y="176">
+			<name x="17" y="161">CS</name>
+		</location>
+		<init ref="id2"/>
+		<transition id="id4">
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="guard" x="110" y="25">id==0</label>
+			<label kind="assignment" x="110" y="51">x = 0</label>
+		</transition>
+		<transition id="id5">
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="assignment" x="144" y="93">x = 0,
+id = pid</label>
+		</transition>
+		<transition id="id6">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="263" y="93">id==0</label>
+			<label kind="assignment" x="263" y="110">x = 0</label>
+			<nail x="251" y="146"/>
+			<nail x="251" y="82"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="guard" x="102" y="153">x&gt;DELAY &amp;&amp;
+id==pid</label>
+		</transition>
+		<transition id="id8">
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="assignment" x="8" y="93">id = 0</label>
+		</transition>
+	</template>
+	<system>system P;</system>
+	<queries>
+		<query>
+			<formula/>
+			<comment>Fischer's mutual exclusion protocol.
+			</comment>
+		</query>
+		<query>
+			<formula>A[] forall (i:id_t) forall (j:id_t) P(i).cs &amp;&amp; P(j).cs imply i == j
+			</formula>
+			<comment>Mutex requirement.
+			</comment>
+		</query>
+		<query>
+			<formula>A[] not deadlock
+			</formula>
+			<comment>The system is deadlock free.
+			</comment>
+			<result outcome="success" type="quality" timestamp="2026-03-23 14:42:08 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>P(1).Request --&gt; P(1).Wait
+			</formula>
+			<comment>Whenever P(1) requests access to the critical section it will eventually enter the wait state.
+			</comment>
+			<result outcome="success" type="quality" timestamp="2026-03-23 14:42:05 +0100">
+			</result>
+		</query>
+	</queries>
+</nta>
