@@ -4,6 +4,7 @@
 #include <random>
 #include <thread>
 
+// Creates count random integers and inserts the into the mtqueue
 void produce(mtqueue<int>& queue, size_t count)
 {
     // Thread-local RNG avoids sharing one engine across threads.
@@ -15,12 +16,14 @@ void produce(mtqueue<int>& queue, size_t count)
     }
 }
 
+// Removes count items from the container
 void consume(mtqueue<int>& queue, size_t count)
 {
     size_t consumed = 0;
+    long long dummy_sum = 0; // Prevent compiler from optimizing the loop away
     while (consumed < count) {
         if (auto value = queue.get()) {
-            std::cout << *value << '\n';
+            dummy_sum += value;
             ++consumed;
         } else {
             // let other threads run.

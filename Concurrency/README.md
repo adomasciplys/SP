@@ -66,6 +66,17 @@ mtqueue_bm/10000000   15758818 ns     15736545 ns           44
    4. Check for concurrency issues 
    5. Rerun `mtqueue_bm` benchmark, record the results and compare with previous results.
 
+```
+--------------------------------------------------------------
+Benchmark                    Time             CPU   Iterations
+--------------------------------------------------------------
+mtqueue_bm/100            1088 ns         1083 ns       633158
+mtqueue_bm/1000          10465 ns        10427 ns        67419
+mtqueue_bm/10000        103781 ns       103493 ns         6762
+mtqueue_bm/100000      1047438 ns      1046253 ns          660
+mtqueue_bm/1000000    11441359 ns     10775970 ns           67
+mtqueue_bm/10000000  105342507 ns    105223667 ns            6
+```
 
 ## Futures and Promises
 
