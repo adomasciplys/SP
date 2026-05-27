@@ -2,6 +2,7 @@
 #define MINIPROJECT_PARALLEL_HPP
 
 #include "simulator.hpp"
+#include "thread-pool.hpp"
 
 #include <cstddef>
 #include <type_traits>
@@ -16,15 +17,18 @@ template <std::invocable<stochastic::Simulator&> Reduced>
 auto parallel_runs(const stochastic::Vessel& vessel, std::size_t n, std::size_t base_seed, Reduced reduced_result)
     -> std::vector<std::invoke_result_t<Reduced, stochastic::Simulator&>>
 {
+    auto pool = thread_pool{};
     using Result = std::invoke_result_t<Reduced, stochastic::Simulator&>;
-    std::vector<Result> results(n);
+    std::vector<std::future<Result>> futures;
 
     for (std::size_t i = 0; i < n; i++) {
-        stochastic::Simulator sim{vessel, base_seed + i};
-        results[i] = reduced_result(sim);
+        futures.push_back(pool.async([&vessel, base_seed, i, &reduced_result]() {
+            stochastic::Simulator sim{vessel, base_seed + i};
+            return reduced_result(sim);
+        }));
     }
 
-    return results;
+    return collect(std::move(futures));
 }
 
 #endif //MINIPROJECT_PARALLEL_HPP
