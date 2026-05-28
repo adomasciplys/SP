@@ -3,7 +3,6 @@
 #include "simulator.hpp"
 
 #include <cstddef>
-#include <iostream>
 
 using stochastic::Printer;
 using stochastic::Simulator;
@@ -19,8 +18,8 @@ static void run_config(std::size_t a0, std::size_t b0, std::size_t c0,
 
 int main()
 {
-    // Print the network structure once
-    Printer printer{std::cout};
+    // Dump the network structure to figures/figure1.dot (run `dot -Tpng` on it for an image).
+    Printer printer{"figures/figure1.dot"};
     make_figure1(100, 0, 1).accept(printer);
 
     run_config(100,  0, 1, 2000.0, 42);

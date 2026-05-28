@@ -6,10 +6,14 @@
 #include "vessel.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
 namespace stochastic {
 
-static bool contains(const ReactantList& list, const std::string& name)
+// Anonymous namespace: Helpers are invisible to other translation units.
+namespace {
+
+bool contains(const ReactantList& list, const std::string& name)
 {
     return std::ranges::any_of(list.items,
                                [&](const Reactant& r) { return r.name == name; });
@@ -17,12 +21,26 @@ static bool contains(const ReactantList& list, const std::string& name)
 
 // A species is a catalyst of a reaction when it appears on both sides:
 // consumed as an input and produced again, with no net change in count.
-static bool is_catalyst(const Reaction& r, const std::string& name)
+bool is_catalyst(const Reaction& r, const std::string& name)
 {
     return contains(r.inputs, name) && contains(r.products, name);
 }
 
-Printer::Printer(std::ostream& os) : _os(os) {}
+}  // namespace
+
+Printer::Printer(std::ostream& os) : _file(), _os(os) {}
+
+// Open `output_path` for writing; create the parent directory if it's missing.
+Printer::Printer(const std::filesystem::path& output_path)
+    : _file()
+    , _os(_file)
+{
+    if (auto parent = output_path.parent_path(); !parent.empty())
+        std::filesystem::create_directories(parent);
+    _file.open(output_path);
+    if (!_file)
+        throw std::runtime_error("Printer: cannot open " + output_path.string());
+}
 
 void Printer::visit(const Reactant& r)
 {
@@ -79,6 +97,7 @@ void Printer::visit(const Vessel& v)
         r.accept(*this);
 
     _os << "}\n";
+    _os.flush();  // ensure the dot output is on disk before the caller does anything slow
 }
 
 }  // namespace stochastic

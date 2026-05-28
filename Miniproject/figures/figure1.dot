@@ -1,0 +1,9 @@
+digraph {
+  s0[label="A",shape="box",style="filled",fillcolor="cyan"];
+  s1[label="B",shape="box",style="filled",fillcolor="cyan"];
+  s2[label="C",shape="box",style="filled",fillcolor="cyan"];
+  r0[label="0.001",shape="oval",style="filled",fillcolor="yellow"];
+  s0 -> r0;
+  s2 -> r0 [arrowhead="tee"];
+  r0 -> s1;
+}
