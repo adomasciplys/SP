@@ -1,24 +1,23 @@
-#include "networks.hpp"   // examples::make_seihr — builds the SEIHR vessel
-#include "printer.hpp"    // stochastic::Printer — Graphviz dot output
-#include "simulator.hpp"  // stochastic::Simulator
+#include "networks.hpp"
+#include "printer.hpp"
+#include "simulator.hpp"
 
-#include <algorithm>   // std::max
-#include <cstddef>     // std::size_t
-#include <cstdint>     // std::uint32_t
-#include <iostream>    // std::cout
-#include <parallel.hpp>  // parallel_runs — runs many simulations across cores
+#include <algorithm>
+#include <iostream>
+#include <parallel.hpp>
 
 using stochastic::Printer;
 using stochastic::Simulator;
 using examples::make_seihr;
 
 
-// Run `simulations` independent SEIHR runs for the given population
-// and return the mean of their peak hospitalization.
+// Run SEIHR simulations for the given population and return the mean of their peak hospitalization.
+// Solution to Exercise 9.
 static double mean_peak_hospitilzations(std::uint32_t population, std::size_t simulations, std::size_t seed)
 {
-    const auto vessel = make_seihr(population);  // one shared, read-only network for all runs
-    // parallel_runs gives each run its own Simulator; this lambda reduces a run to its peak H.
+    const auto vessel = make_seihr(population);  // one shared reaction network for all runs.
+    // parallel_runs gives each run its own Simulator.
+    // this lambda reduces a run to its peak H.
     auto peaks = parallel_runs(vessel , simulations, seed, [&vessel](Simulator& sim)
     {
         const auto h_index = vessel.find_index("H");  // position of "H" in the counts vector

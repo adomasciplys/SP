@@ -13,7 +13,7 @@ int main()
     Simulator sim{v, 42};
 
     // Drive the simulator for 48 hours
-    // Ccollect every sample into one PlotSeries per species
+    // Collect every sample into one PlotSeries per species
     auto traj = collect_trajectory(v, sim, 48.0);
 
     // Wider image of 2400x800 so the 48-hour oscillations don't get crammed.
