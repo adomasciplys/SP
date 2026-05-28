@@ -14,8 +14,13 @@ add_library(stochastic STATIC
     source/simulator.cpp)
 
 include(cmake/doctest.cmake)
+include(benchmark.cmake)
 
 target_include_directories(stochastic PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
+# Parallel simulation (parallel.hpp / thread-pool.hpp) needs a threading runtime.
+find_package(Threads REQUIRED)
+target_link_libraries(stochastic PUBLIC Threads::Threads)
 
 # Example programs.
 add_executable(figure1 examples/figure1.cpp)

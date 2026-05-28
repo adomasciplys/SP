@@ -1,0 +1,106 @@
+{
+  "context": {
+    "date": "2026-05-27T22:26:04+02:00",
+    "host_name": "Adomass-MacBook-Pro.local",
+    "executable": "./build/tests/parallel_bm",
+    "num_cpus": 8,
+    "mhz_per_cpu": 24,
+    "cpu_scaling_enabled": false,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 0
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 131072,
+        "num_sharing": 0
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 4194304,
+        "num_sharing": 1
+      }
+    ],
+    "load_avg": [6.1377,4.6958,4.32959],
+    "library_version": "v1.9.5",
+    "library_build_type": "debug",
+    "json_schema_version": 1
+  },
+  "benchmarks": [
+    {
+      "name": "bm_sequential/real_time",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "bm_sequential/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1,
+      "real_time": 7.5932617417071015e+04,
+      "cpu_time": 7.5426119999999995e+04,
+      "time_unit": "ms"
+    },
+    {
+      "name": "bm_parallel/1/real_time",
+      "family_index": 1,
+      "per_family_instance_index": 0,
+      "run_name": "bm_parallel/1/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1,
+      "real_time": 7.9777229415718466e+04,
+      "cpu_time": 9.6200000000123964e-01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "bm_parallel/2/real_time",
+      "family_index": 1,
+      "per_family_instance_index": 1,
+      "run_name": "bm_parallel/2/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1,
+      "real_time": 4.0054826041683555e+04,
+      "cpu_time": 9.1199999999957981e-01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "bm_parallel/4/real_time",
+      "family_index": 1,
+      "per_family_instance_index": 2,
+      "run_name": "bm_parallel/4/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1,
+      "real_time": 2.1133128417190164e+04,
+      "cpu_time": 8.7799999998594558e-01,
+      "time_unit": "ms"
+    },
+    {
+      "name": "bm_parallel/8/real_time",
+      "family_index": 1,
+      "per_family_instance_index": 3,
+      "run_name": "bm_parallel/8/real_time",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 1,
+      "real_time": 1.4492279541213065e+04,
+      "cpu_time": 8.3000000000765795e-01,
+      "time_unit": "ms"
+    }
+  ]
+}

@@ -71,7 +71,7 @@ public:
 
     /** asynchronous dispatch over the pool, C++20 implementation */
     // Queue `fn(args...)` to run on some worker; hand back a future for its result.
-    template <typename Fn, typename... Args, typename Ret = std::result_of_t<std::decay_t<Fn>(std::decay_t<Args>...)>>
+    template <typename Fn, typename... Args, typename Ret = std::invoke_result_t<std::decay_t<Fn>, std::decay_t<Args>...>>
     std::future<Ret> async(Fn&& fn, Args&&... args)
     {
         // promise is not copyable, thus wrap into a smart pointer:
