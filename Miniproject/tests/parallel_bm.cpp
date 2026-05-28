@@ -6,18 +6,19 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <thread>
+#include <cstdint>
 
 using examples::make_seihr;
 using stochastic::Simulator;
 
 namespace
 {
-    // Population to simulate
-    constexpr std::uint32_t kPopulation = 100'000;
-
     // 100 independent simulations.
     constexpr std::size_t kRuns = 100;
+
+    // Each benchmark function is re-run this many times so Google Benchmark
+    // can report mean / median / stddev instead of a single sample.
+    constexpr int kRepetitions = 5;
 
     // Run a single SEIHR trajectory and return its peak H count.
     std::size_t peak_hospitalization(Simulator& sim, std::size_t h_index)
@@ -27,16 +28,13 @@ namespace
             peak = std::max(peak, s.counts[h_index]);
         return peak;
     }
-
-    // Ensure we always use one thread
-    unsigned max_threads() { return std::max(1u, std::thread::hardware_concurrency()); }
 }
 
-// Baseline: the 100 simulations run on one thread, no pool involved.
-// This is the "single core" reference the parallel version is measured against.
+// Baseline: 100 simulations on one thread, no pool involved.
 static void bm_sequential(benchmark::State& state)
 {
-    const auto vessel = make_seihr(kPopulation);
+    const auto population = static_cast<std::uint32_t>(state.range(0));
+    const auto vessel = make_seihr(population);
     const auto h = vessel.find_index("H");
     for (auto _ : state)
     {
@@ -51,16 +49,21 @@ static void bm_sequential(benchmark::State& state)
     }
 }
 
-// UseRealTime: report wall-clock time
-BENCHMARK(bm_sequential)->Unit(benchmark::kMillisecond)->UseRealTime();
+// UseRealTime: report wall-clock time.
+BENCHMARK(bm_sequential)
+    ->Arg(10'000)->Arg(100'000)
+    ->Unit(benchmark::kMillisecond)->UseRealTime()
+    ->Repetitions(kRepetitions)->ReportAggregatesOnly(true);
 
-// Parallel: The same 100 simulations spread over worker threads.
-//   range(0) == 1:           single core (bm_sequential, plus a little pool overhead)
-//   range(0) == #cores:      multi-core
+// Parallel: The 100 simulations across:
+//   threads == 1:                       single core (should match bm_sequential up to pool overhead).
+//   threads == hardware_concurrency:    full multi-core
+//   threads >  hardware_concurrency:    deliberate over-subscription.
 static void bm_parallel(benchmark::State& state)
 {
     const auto threads = static_cast<std::size_t>(state.range(0));
-    const auto vessel = make_seihr(kPopulation);
+    const auto population = static_cast<std::uint32_t>(state.range(1));
+    const auto vessel = make_seihr(population);
     const auto h = vessel.find_index("H");
     for (auto _ : state)
     {
@@ -72,9 +75,8 @@ static void bm_parallel(benchmark::State& state)
     }
 }
 
-// Sweep 1, 2, 4, ... up to the core count so the JSON/plot shows the scaling curve.
+// Threads x population
 BENCHMARK(bm_parallel)
-    ->RangeMultiplier(2)->Range(1, max_threads())
-    ->Unit(benchmark::kMillisecond)->UseRealTime();
-
-// main() is provided by benchmark::benchmark_main (linked in tests/CMakeLists.txt).
+    ->ArgsProduct({{1, 2, 4, 8, 16, 32, 100}, {10'000, 100'000}})
+    ->Unit(benchmark::kMillisecond)->UseRealTime()
+    ->Repetitions(kRepetitions)->ReportAggregatesOnly(true);
