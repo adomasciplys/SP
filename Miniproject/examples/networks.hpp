@@ -12,8 +12,8 @@ namespace examples
 {
 using stochastic::Vessel;
 
-// Figure 1 from the assignment: the toy reaction
-//     A + C --(lambda)--> B + C
+// Figure 1 from the assignment
+//     A + C -- (lambda) --> B + C
 // C is a catalyst, lambda = 0.001.
 inline Vessel make_figure1(std::size_t a0, std::size_t b0, std::size_t c0)
 {
@@ -25,7 +25,8 @@ inline Vessel make_figure1(std::size_t a0, std::size_t b0, std::size_t c0)
     return v;
 }
 
-// SEIHR model for COVID-19 - Listing 2 / Table 2.
+// Figure 3 from assignment
+// SEIHR model for COVID-19
 inline Vessel make_seihr(std::uint32_t N)
 {
     auto v = Vessel{"COVID19 SEIHR: " + std::to_string(N)};
@@ -57,7 +58,8 @@ inline Vessel make_seihr(std::uint32_t N)
     return v;
 }
 
-// Genetic oscillator for circadian rhythm - Listing 1 / Table 1.
+// Figure 2 from assignment
+// Genetic oscillator for circadian rhythm
 inline Vessel make_circadian()
 {
     const auto alphaA = 50;

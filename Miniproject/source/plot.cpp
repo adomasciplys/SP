@@ -60,7 +60,9 @@ void save_trajectory_plot(const std::string& filename,
                           const std::string& ylabel,
                           const std::vector<double>& times,
                           const std::vector<PlotSeries>& series,
-                          std::size_t max_points)
+                          std::size_t max_points,
+                          int width,
+                          int height)
 {
     // Need a live QApplication before constructing any Qt widget/chart.
     ensure_qapplication();
@@ -93,9 +95,7 @@ void save_trajectory_plot(const std::string& filename,
     if (auto axes = chart->axes(Qt::Vertical); !axes.isEmpty())
         axes.first()->setTitleText(QString::fromStdString(ylabel));
 
-    // Render via a QGraphicsScene
-    constexpr int width = 1200;
-    constexpr int height = 800;
+    // Render via a QGraphicsScene at the caller-chosen size.
     chart->resize(width, height);
     QGraphicsScene scene;
     scene.addItem(chart);

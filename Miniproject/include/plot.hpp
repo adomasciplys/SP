@@ -19,14 +19,18 @@ struct PlotSeries
 
 // Render a multi-series line plot to a PNG using Qt Charts.
 // If the trajectory has more than `max_points` samples, it is uniformly
-// downsampled to `max_points` before rendering
+// downsampled to `max_points` before rendering.
+// `width`/`height` control the output image size (defaults 1200x800);
+// bump `width` for long time series so the x-axis isn't crammed.
 void save_trajectory_plot(const std::string& filename,
                           const std::string& title,
                           const std::string& xlabel,
                           const std::string& ylabel,
                           const std::vector<double>& times,
                           const std::vector<PlotSeries>& series,
-                          std::size_t max_points = 10000);
+                          std::size_t max_points = 10000,
+                          int width  = 1200,
+                          int height = 800);
 
 }  // namespace plot
 

@@ -35,7 +35,6 @@ static double mean_peak_hospitilzations(std::uint32_t population, std::size_t si
 
 int main()
 {
-    // Dump the network structure to figures/seihr.dot — its shape is the same for every N.
     Printer printer{"figures/seihr.dot"};
     make_seihr(10000).accept(printer);
 
@@ -43,6 +42,7 @@ int main()
     std::cout << "Peak hospitilization after 1 run - Population = 10.000:  " << mean_peak_hospitilzations(10'000, 1, 42) << '\n';
     std::cout << "Peak hospitilization after 1 run - Population = 589.755:  " << mean_peak_hospitilzations(589'755, 1, 42) << '\n';
     std::cout << "Peak hospitilization after 1 run - Population = 5.822.763:  "<< mean_peak_hospitilzations(5'822'763, 1, 42) << '\n';
+
     // Mean peak hospitalization estimated over 100 parallel runs (Exercise 9)
     std::cout << "Mean peak hospitilization after 100 runs - Population 10.000:  " << mean_peak_hospitilzations(10'000, 100, 42) << '\n';
     std::cout << "Mean peak hospitilization after 100 runs - Population 589.755:  "<< mean_peak_hospitilzations(589'755, 100, 42) << '\n';
