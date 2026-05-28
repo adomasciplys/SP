@@ -41,9 +41,9 @@ namespace stochastic
         compute_delays();
 
         // Line 4: r∶= argminr∈R r.delay;
-        const std::size_t idx = std::distance(
-            delays.begin(), std::ranges::min_element(delays));
-        const Reaction& fired_reaction = vessel.reactions()[idx];
+        const auto idx = static_cast<std::size_t>(
+            std::distance(delays.begin(), std::ranges::min_element(delays)));
+        const auto& fired_reaction = vessel.reactions()[idx];
 
         // Line 5: t∶= t + r.delay;
         t += delays[idx];
@@ -61,9 +61,9 @@ namespace stochastic
     {
         std::ranges::transform(vessel.reactions(), delays.begin(),
             [&](const Reaction& r) -> double {
-                const double lambda = r.rate * input_product(r.inputs);
+                const auto lambda = r.rate * static_cast<double>(input_product(r.inputs));
                 if (lambda == 0.0) return std::numeric_limits<double>::infinity();
-                std::exponential_distribution<> dist(lambda);
+                auto dist = std::exponential_distribution<>{lambda};
                 return dist(generator);
             });
     }

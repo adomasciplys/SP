@@ -19,7 +19,7 @@ auto parallel_runs(const stochastic::Vessel& vessel, std::size_t n, std::size_t 
 {
     auto pool = thread_pool(num_threads);  // capped worker count, so we never over-subscribe
     using Result = std::invoke_result_t<Reduced, stochastic::Simulator&>;  // per-run result type
-    std::vector<std::future<Result>> futures;  // one future per run, kept in run order
+    auto futures = std::vector<std::future<Result>>{};  // one future per run, kept in run order
 
     // Queue n independent simulations. Each run gets a distinct seed
     // so the runs differ but stay reproducible no matter which thread runs which.

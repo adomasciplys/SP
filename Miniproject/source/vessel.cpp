@@ -14,8 +14,10 @@ Reactant Vessel::environment() const
 Reactant Vessel::add(std::string name, std::size_t initial_count)
 {
     // Symbol table enforces uniqueness; throws std::invalid_argument on duplicate.
+    // Insert before moving so a duplicate-name throw leaves `name` intact for the
+    // exception message stack.
     _index.insert(name, _species.size());
-    Reactant r{name, initial_count};
+    auto r = Reactant{std::move(name), initial_count};
     _species.push_back(r);
     return r;
 }
