@@ -29,6 +29,7 @@ int main()
                          "COVID-19 SEIHR (N=10000)",
                          "time, days",
                          "population count",
-                         traj.times, traj.series);
+                         traj.times, traj.series,
+                         10000,2400, 800);
     return 0;
 }
