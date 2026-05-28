@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+// Forward declarations so the public header doesn't drag in simulator.hpp.
+namespace stochastic { struct Vessel; struct Simulator; }
+
 namespace plot
 {
 
@@ -17,11 +20,24 @@ struct PlotSeries
     std::vector<double> y;
 };
 
+// A complete trajectory ready to hand to save_trajectory_plot:
+// one PlotSeries per species, and a matching `times` column.
+// series[k] corresponds to v.species()[k]
+struct Trajectory
+{
+    std::vector<double> times;
+    std::vector<PlotSeries> series;
+};
+
+// Run `sim` until `end_time` (streaming via the Generator coroutine)
+// and collect every sample into a Trajectory.
+Trajectory collect_trajectory(const stochastic::Vessel& v,
+                              stochastic::Simulator& sim,
+                              double end_time);
+
 // Render a multi-series line plot to a PNG using Qt Charts.
-// If the trajectory has more than `max_points` samples, it is uniformly
-// downsampled to `max_points` before rendering.
-// `width`/`height` control the output image size (defaults 1200x800);
-// bump `width` for long time series so the x-axis isn't crammed.
+// If the trajectory has more than `max_points` samples,
+// it is uniformly downsampled to `max_points` before rendering.
 void save_trajectory_plot(const std::string& filename,
                           const std::string& title,
                           const std::string& xlabel,

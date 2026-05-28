@@ -1,5 +1,7 @@
 #include "plot.hpp"
 
+#include "simulator.hpp"
+
 #include <QApplication>
 #include <QGraphicsScene>
 #include <QImage>
@@ -53,6 +55,25 @@ std::vector<std::size_t> stride_indices(std::size_t n, std::size_t max)
 }
 
 }  // namespace
+
+// One labelled series per species, then stream the trajectory in via sim.run(...)
+// Each Sample is appended to its column and discarded
+Trajectory collect_trajectory(const stochastic::Vessel& v,
+                              stochastic::Simulator& sim,
+                              double end_time)
+{
+    Trajectory result;
+    result.series.reserve(v.species().size());
+    for (const auto& s : v.species())
+        result.series.push_back({s.name, {}});
+
+    for (const auto& sample : sim.run(end_time)) {
+        result.times.push_back(sample.time);
+        for (std::size_t k = 0; k < result.series.size(); ++k)
+            result.series[k].y.push_back(static_cast<double>(sample.counts[k]));
+    }
+    return result;
+}
 
 void save_trajectory_plot(const std::string& filename,
                           const std::string& title,

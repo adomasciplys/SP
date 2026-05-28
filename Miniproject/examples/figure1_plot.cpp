@@ -1,13 +1,12 @@
-#include "networks.hpp"
-#include "plot.hpp"
-#include "simulator.hpp"
+#include "networks.hpp"   // examples::make_figure1 — the toy A + C → B + C network
+#include "plot.hpp"       // plot::collect_trajectory + save_trajectory_plot
+#include "simulator.hpp"  // stochastic::Simulator
 
 #include <array>
 #include <cstddef>
 #include <string>
-#include <vector>
 
-using plot::PlotSeries;
+using plot::collect_trajectory;
 using plot::save_trajectory_plot;
 using stochastic::Simulator;
 using examples::make_figure1;
@@ -19,29 +18,14 @@ static void run_and_plot(const std::string& filename, const std::string& title,
 {
     const auto v = make_figure1(a0, b0, c0);
     Simulator sim{v, seed};
-
-    // One labelled series per species. series[k].y[i] corresponds to v.species()[k] at time times[i]
-    std::vector<PlotSeries> series;
-    series.reserve(v.species().size());
-    for (const auto& s : v.species())
-        series.push_back({s.name, {}});
-
-    // Stream the trajectory lazily via the Generator coroutine
-    // Each Sample is appended to its column and then discarded
-    std::vector<double> times;
-    for (const auto& sample : sim.run(end_time)) {
-        times.push_back(sample.time);
-        for (std::size_t k = 0; k < series.size(); ++k)
-            series[k].y.push_back(static_cast<double>(sample.counts[k]));
-    }
-
-    save_trajectory_plot(filename, title, "time", "count", times, series);
+    auto traj = collect_trajectory(v, sim, end_time);
+    save_trajectory_plot(filename, title, "time", "count", traj.times, traj.series);
 }
 
 int main()
 {
     // The three Figure 1 configurations from the assignment.
-    // Each varies the catalyst count C and the initial A/B split
+    // Each varies the catalyst count C and the initial A/B split.
     struct Config {
         std::string filename;
         std::string title;
