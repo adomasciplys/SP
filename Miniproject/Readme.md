@@ -1,3 +1,18 @@
+# SEIHR peak hospitalization
+
+Produced by `examples/seihr.cpp` (`mean_peak_hospitilzations(...)`), simulating up to
+time `t = 100` with seed `42`. The single-run column drives one trajectory per
+population; the 100-run column averages the per-run peak H count over 100 independent
+simulations dispatched in parallel via `parallel_runs`.
+
+| Population                  | Single run (peak H) | Mean over 100 runs (peak H) |
+| --------------------------- | ------------------: | --------------------------: |
+| 10.000                      |                   2 |                        3.54 |
+| 589.755 (Northern Jutland)  |                 119 |                       128.3 |
+| 5.822.763 (Denmark)         |               1 151 |                     1 190.1 |
+
+---
+
 # Benchmark results
 
 Measures the cost of running **100 SEIHR simulations** under two configurations
