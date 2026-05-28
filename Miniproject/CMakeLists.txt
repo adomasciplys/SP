@@ -14,7 +14,7 @@ add_library(stochastic STATIC
     source/simulator.cpp)
 
 include(cmake/doctest.cmake)
-include(benchmark.cmake)
+include(cmake/benchmark.cmake)
 
 target_include_directories(stochastic PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
