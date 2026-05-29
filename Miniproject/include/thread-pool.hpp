@@ -99,16 +99,6 @@ public:
         return ret->get_future();  // caller waits on this for the result
     }
 
-    // Convenience: run `fn` once per input in parallel, returning a future per input.
-    template <typename Fn, typename In, typename Out = std::invoke_result_t<Fn, In>>
-    std::vector<std::future<Out>> dispatch(Fn&& fn, const std::vector<In>& inputs)
-    {
-        auto res = std::vector<std::future<Out>>(inputs.size());  // one future per input
-        // Submit each input as its own task; keep the futures in input order.
-        std::ranges::transform(inputs, res.begin(), [this, &fn](const In& input) { return async(fn, input); });
-        return res;
-    }
-
     // On destruction: tell workers to stop, then wait for each to finish.
     ~thread_pool()
     {
