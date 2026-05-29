@@ -4,12 +4,12 @@
 
 namespace stochastic {
 
-Reaction operator>>=(PartialReaction pr, Reactant product)
+Reaction operator>>=(RatedReactants pr, Reactant product)
 {
     return Reaction{std::move(pr.inputs), ReactantList{{std::move(product)}}, pr.rate};
 }
 
-Reaction operator>>=(PartialReaction pr, ReactantList products)
+Reaction operator>>=(RatedReactants pr, ReactantList products)
 {
     return Reaction{std::move(pr.inputs), std::move(products), pr.rate};
 }

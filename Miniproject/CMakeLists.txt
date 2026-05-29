@@ -7,7 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Library code: types, operators, vessel.
 add_library(stochastic STATIC
     source/reactant_list.cpp
-    source/partial_reaction.cpp
+        source/rated_reactants.cpp
     source/reaction.cpp
     source/vessel.cpp
     source/printer.cpp

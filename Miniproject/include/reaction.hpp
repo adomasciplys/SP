@@ -1,7 +1,7 @@
 #ifndef MINIPROJECT_REACTION_HPP
 #define MINIPROJECT_REACTION_HPP
 
-#include "partial_reaction.hpp"
+#include "rated_reactants.hpp"
 #include "reactant_list.hpp"
 #include "visitor.hpp"
 
@@ -10,11 +10,11 @@
 namespace stochastic {
 
 // A complete reaction rule: inputs -- (rate) --> products.
-// Built by '>>=' from a PartialReaction and the products on the right hand side.
+// Built by '>>=' from a RatedReactants and the products on the right hand side.
 //
 // Full chain for (A + B) >> rate >>= C + D:
 //   1. 'A + B'               -> ReactantList   (operator+ in reactant_list.hpp)
-//   2. '... >> rate'         -> PartialReaction (operator>> in partial_reaction.hpp)
+//   2. '... >> rate'         -> RatedReactants (operator>> in rated_reactants.hpp)
 //   3. '... >>= C + D'       -> Reaction        (operator>>= below)
 //
 // Operator precedence makes this parse without extra parenthesis:
@@ -36,10 +36,10 @@ struct Reaction
 };
 
 // '... >>= X'        -> single product on the right hand side.
-Reaction operator>>=(PartialReaction pr, Reactant product);
+Reaction operator>>=(RatedReactants pr, Reactant product);
 
 // '... >>= X + Y'    -> multiple products on the right hand side.
-Reaction operator>>=(PartialReaction pr, ReactantList products);
+Reaction operator>>=(RatedReactants pr, ReactantList products);
 
 }  // namespace stochastic
 
