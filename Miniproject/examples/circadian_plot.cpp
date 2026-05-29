@@ -22,7 +22,6 @@ int main()
                          "time, hours",
                          "molecule count",
                          traj.times, traj.series,
-                         10000,
                          2400,
                          800);
     return 0;

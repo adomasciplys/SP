@@ -30,6 +30,6 @@ int main()
                          "time, days",
                          "population count",
                          traj.times, traj.series,
-                         10000,2400, 800);
+                         2400, 800);
     return 0;
 }

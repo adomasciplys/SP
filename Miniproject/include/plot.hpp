@@ -35,14 +35,13 @@ Trajectory collect_trajectory(const stochastic::Vessel& v,
                               double end_time);
 
 // Render a multi-series line plot to a PNG using Qt Charts.
-// If the trajectory has more than 'max_points' samples, it is uniformly downsampled
+// All samples are drawn — fine for the trajectory sizes this project produces.
 void save_trajectory_plot(const std::string& filename,
                           const std::string& title,
                           const std::string& xlabel,
                           const std::string& ylabel,
                           const std::vector<double>& times,
                           const std::vector<PlotSeries>& series,
-                          std::size_t max_points = 10000,
                           int width  = 1200,
                           int height = 800);
 

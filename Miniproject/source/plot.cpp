@@ -33,32 +33,9 @@ void ensure_qapplication()
     static QApplication app{argc, argv};
 }
 
-// Pick at most 'max' indices from [0, n) at uniform stride.
-// Used to thin out very long trajectories before plotting
-std::vector<std::size_t> stride_indices(std::size_t n, std::size_t max)
-{
-    std::vector<std::size_t> idx;
-    if (n == 0) return idx;
-
-    // Nothing to thin: hand back every index.
-    if (n <= max) {
-        idx.reserve(n);
-        for (std::size_t i = 0; i < n; ++i) idx.push_back(i);
-        return idx;
-    }
-
-    // Otherwise step through [0, n) in `max` equally-spaced jumps.
-    // The last index is always n-1 (so the plot reaches the final sample)
-    idx.reserve(max);
-    const double step = static_cast<double>(n - 1) / static_cast<double>(max - 1);
-    for (std::size_t i = 0; i < max; ++i)
-        idx.push_back(static_cast<std::size_t>(i * step));
-    return idx;
-}
-
 }  // namespace
 
-// One labelled series per species, then stream the trajectory in via sim.run(...)
+// One labelled series per species
 // Each Sample is appended to its column and discarded
 Trajectory collect_trajectory(const stochastic::Vessel& v,
                               stochastic::Simulator& sim,
@@ -72,7 +49,7 @@ Trajectory collect_trajectory(const stochastic::Vessel& v,
     for (const auto& sample : sim.run(end_time)) {
         result.times.push_back(sample.time);
         for (std::size_t k = 0; k < result.series.size(); ++k)
-            result.series[k].y.push_back(static_cast<double>(sample.counts[k]));
+            result.series[k].y.push_back(sample.counts[k]);
     }
     return result;
 }
@@ -83,15 +60,11 @@ void save_trajectory_plot(const std::string& filename,
                           const std::string& ylabel,
                           const std::vector<double>& times,
                           const std::vector<PlotSeries>& series,
-                          std::size_t max_points,
                           int width,
                           int height)
 {
     // Need a live QApplication before constructing any Qt widget/chart.
     ensure_qapplication();
-
-    // Decide which samples to actually plot (caps long trajectories).
-    const auto idx = stride_indices(times.size(), max_points);
 
     // Build the chart
     auto* chart = new QChart;
@@ -104,10 +77,8 @@ void save_trajectory_plot(const std::string& filename,
     for (const auto& s : series) {
         auto* line = new QLineSeries;
         line->setName(QString::fromStdString(s.name));
-        for (std::size_t k : idx) {
-            if (k < s.y.size())
-                line->append(times[k], s.y[k]);
-        }
+        for (std::size_t k = 0; k < times.size() && k < s.y.size(); ++k)
+            line->append(times[k], s.y[k]);
         chart->addSeries(line);
     }
 
@@ -118,12 +89,12 @@ void save_trajectory_plot(const std::string& filename,
     if (auto axes = chart->axes(Qt::Vertical); !axes.isEmpty())
         axes.first()->setTitleText(QString::fromStdString(ylabel));
 
-    // Render via a QGraphicsScene at the caller-chosen size.
+    // Render via a QGraphicsScene, at chosen size
     chart->resize(width, height);
     QGraphicsScene scene;
     scene.addItem(chart);
 
-    // Paint the scene into a white-backed image, then write it out as PNG.
+    // Paint the scene into white background image, then write it out as PNG.
     QImage img{width, height, QImage::Format_ARGB32};
     img.fill(Qt::white);
     QPainter painter{&img};
