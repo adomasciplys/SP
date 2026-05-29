@@ -9,10 +9,14 @@
 #include <algorithm>    // std::ranges::transform (used in dispatch / collect)
 #include <ranges>       // the range overloads of the above
 
+// This code has been copied from the solutions in Lecture 11
+// https://people.cs.aau.dk/~marius/git/Concurrency.git/
+// "There is no need to reinvent the wheel"
+// The only thing I have added is comments for myself and removed parts of the code I do not need
+
 // A fixed set of worker threads sharing one task queue.
 // Submitting more tasks than there are threads simply queues them, so the number
 // of threads actually running never exceeds the pool size (no over-subscription).
-// This code has been snatched from the solutions in Lecture 11, but I have added comments for myself
 class thread_pool
 {
     std::vector<std::jthread> threads;  // the worker threads

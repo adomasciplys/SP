@@ -6,6 +6,10 @@
 #include <optional>
 #include <utility>
 
+// This Generator is heavily inspired by:
+// https://www.youtube.com/watch?v=8sEe-4tig_A (C++20’s Coroutines for Beginners - Andreas Fertig - CppCon 2022)
+// git clone https://people.cs.aau.dk/~marius/git/Coroutines.git (Generator from Lecture 12)
+
 // A coroutine wrapper that produces a sequence of values lazily.
 // Functions returning this type can use `co_yield` to return values one at a time.
 // The coroutine pauses execution after each `co_yield`
