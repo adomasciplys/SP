@@ -12,17 +12,17 @@ TEST_CASE("Vessel::add(species): duplicates throw")
     v.add("A", 1);
     CHECK_THROWS_AS(v.add("A", 999), std::invalid_argument);
     CHECK(v.species().size() == 1);
-    CHECK(v.find("A").initial_count == 1);
+    CHECK(v.species()[v.find_index("A")].initial_count == 1);
 }
 
-TEST_CASE("Vessel::find: missing species throws")
+TEST_CASE("Vessel::find_index: missing species throws")
 {
     Vessel v{"v"};
     v.add("A", 1);
-    CHECK_THROWS_AS(static_cast<void>(v.find("B")), std::out_of_range);
+    CHECK_THROWS_AS(static_cast<void>(v.find_index("B")), std::out_of_range);
 }
 
-TEST_CASE("Vessel::environment: marker is the empty-name reactant")
+TEST_CASE("Vessel::environment: marker is the empty name reactant")
 {
     Vessel v{"v"};
     const auto env = v.environment();
