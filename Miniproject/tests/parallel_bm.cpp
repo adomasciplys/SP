@@ -33,7 +33,7 @@ namespace
 // Baseline: 100 simulations on one thread, no pool involved.
 static void bm_sequential(benchmark::State& state)
 {
-    const auto population = static_cast<std::uint32_t>(state.range(0));
+    const auto population = state.range(0);
     const auto vessel = make_seihr(population);
     const auto h = vessel.find_index("H");
     for (auto _ : state)
@@ -57,12 +57,12 @@ BENCHMARK(bm_sequential)
 
 // Parallel: The 100 simulations across:
 //   threads == 1:                       single core (should match bm_sequential up to pool overhead).
-//   threads == hardware_concurrency:    full multi-core
+//   threads == hardware_concurrency:    multi-core
 //   threads >  hardware_concurrency:    deliberate over-subscription.
 static void bm_parallel(benchmark::State& state)
 {
-    const auto threads = static_cast<std::size_t>(state.range(0));
-    const auto population = static_cast<std::uint32_t>(state.range(1));
+    const auto threads = state.range(0);
+    const auto population = state.range(1);
     const auto vessel = make_seihr(population);
     const auto h = vessel.find_index("H");
     for (auto _ : state)

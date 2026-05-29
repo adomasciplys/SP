@@ -9,11 +9,11 @@
 // This Generator is heavily inspired by:
 // https://www.youtube.com/watch?v=8sEe-4tig_A (C++20’s Coroutines for Beginners - Andreas Fertig - CppCon 2022)
 // git clone https://people.cs.aau.dk/~marius/git/Coroutines.git (Generator from Lecture 12)
-// I mean it is only possible to innovate so much when a Coroutines have a set structure
+// I mean it is only possible to innovate so much when Coroutines have a set structure
 
 // A coroutine wrapper that produces a sequence of values lazily.
-// Functions returning this type can use `co_yield` to return values one at a time.
-// The coroutine pauses execution after each `co_yield`
+// Functions returning this type can use 'co_yield' to return values one at a time.
+// The coroutine pauses execution after each 'co_yield'
 // Only calculates the next value when the caller requests it
 template <std::movable T>
 struct Generator

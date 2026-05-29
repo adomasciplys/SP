@@ -1,13 +1,13 @@
 #ifndef MINIPROJECT_THREAD_POOL_HPP
 #define MINIPROJECT_THREAD_POOL_HPP
 
-#include <thread>       // std::jthread — a thread that auto-joins when destroyed
-#include <mutex>        // std::mutex, std::unique_lock — protect the shared task queue
-#include <future>       // std::future, std::promise — carry a result back to the caller
-#include <functional>   // std::function — type-erased "any callable taking no args"
-#include <queue>        // std::queue — FIFO list of pending tasks
-#include <algorithm>    // std::ranges::transform (used in dispatch / collect)
-#include <ranges>       // the range overloads of the above
+#include <thread>       // std::jthread: a thread that auto-joins when destroyed
+#include <mutex>        // std::mutex, std::unique_lock: protect the shared task queue
+#include <future>       // std::future, std::promise: carry a result back to the caller
+#include <functional>   // std::function: type-erased "any callable taking no args"
+#include <queue>        // std::queue: FIFO list of pending tasks
+#include <algorithm>
+#include <ranges>
 
 // This code has been copied from the solutions in Lecture 11
 // https://people.cs.aau.dk/~marius/git/Concurrency.git/

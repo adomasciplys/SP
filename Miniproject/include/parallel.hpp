@@ -6,31 +6,40 @@
 #include <type_traits>
 #include <vector>
 
-// I have used AI to write parallel_runs
 
-// Reduced is the function supplied to reduce one finished simulation down to a single result.
-template <std::invocable<stochastic::Simulator&> Reduced>
+// Reduce is the function supplied to reduce one finished simulation down to a single result.
+// Basically, this template says:
+//     - Reduce must be an invocable (e.g. a function)
+//     - It also must take a Simulator as an argument
+template <std::invocable<stochastic::Simulator&> Reduce>
 
 // All simulators share the same vessel and run n simulations
 // The results from each simulation are returned into a vector
 // num_threads caps the worker pool
-auto parallel_runs(const stochastic::Vessel& vessel, std::size_t n, std::size_t base_seed, Reduced reduced_result,
-                   std::size_t num_threads = std::thread::hardware_concurrency())
-    // Return a vector of whatever reduced_result(sim) produces, one entry per run.
-    -> std::vector<std::invoke_result_t<Reduced, stochastic::Simulator&>>
+auto parallel_runs(const stochastic::Vessel& vessel,
+                   std::size_t n, // number of simulations
+                   std::size_t base_seed,
+                   Reduce reduce, // function to aggregate simulator results
+                   std::size_t num_threads = std::thread::hardware_concurrency() // number of workers
+)
+// Return a vector of whatever reduce(sim) produces, one entry per simulation run.
+    -> std::vector<std::invoke_result_t<Reduce, stochastic::Simulator&>>
 {
-    auto pool = thread_pool(num_threads);  // capped worker count, so we never over-subscribe
-    using Result = std::invoke_result_t<Reduced, stochastic::Simulator&>;  // per run result type
-    auto futures = std::vector<std::future<Result>>{};  // one future per run, kept in run order
+    using Result = std::invoke_result_t<Reduce, stochastic::Simulator&>; // shorten, so I do not have to repeat
+    auto pool = thread_pool(num_threads); // capped worker count, so we never over-subscribe
+    auto futures = std::vector<std::future<Result>>{}; // one future per run, kept in run order
+    futures.reserve(n);
 
-    // Queue n independent simulations. Each run gets a distinct seed
-    // so the runs differ but stay reproducible no matter which thread runs which.
-    for (std::size_t i = 0; i < n; i++) {
-        futures.push_back(pool.async([&vessel, base_seed, i, &reduced_result]() {
-            stochastic::Simulator sim{vessel, base_seed + i};
-            return reduced_result(sim);  // reduce it to one value
-        }));
-    }
+    // One simulation: build a Simulator with seed (base_seed + i), reduce its result.
+    auto run_one = [&vessel, base_seed, &reduce](std::size_t i) {
+        auto sim = stochastic::Simulator{vessel, base_seed + i};
+        return reduce(sim); // reduce it to one value
+    };
+
+    // Queue n independent simulations.
+    // Each run gets a distinct seed so the runs differ but stay reproducible
+    for (std::size_t i = 0; i < n; ++i)
+        futures.push_back(pool.async(run_one, i));
 
     // Block until every run finishes, then collect their results into a vector.
     return collect(std::move(futures));
