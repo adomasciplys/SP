@@ -8,10 +8,9 @@
 
 namespace stochastic {
 
-// A species in the reaction network. Identity is by name.
-// An empty name marks the "void" (∅) used in decay reactions like
-// `A >> rate >>= env`, where the reactant is consumed but no real species
-// is produced. The simulator skips count updates for it.
+// A species in the reaction network.
+// Identity is by name.
+// An empty name marks the env used in decay reactions
 struct Reactant
 {
     std::string name;

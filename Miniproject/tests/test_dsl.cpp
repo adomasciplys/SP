@@ -43,12 +43,12 @@ TEST_CASE("DSL: (A + B) >> rate >>= C + D builds a Reaction with the right shape
     REQUIRE(v.reactions().size() == 1);
     const auto& r = v.reactions().front();
     CHECK(r.rate == doctest::Approx(0.25));
-    REQUIRE(r.inputs.items.size() == 2);
-    CHECK(r.inputs.items[0].name == "A");
-    CHECK(r.inputs.items[1].name == "B");
-    REQUIRE(r.products.items.size() == 2);
-    CHECK(r.products.items[0].name == "C");
-    CHECK(r.products.items[1].name == "D");
+    REQUIRE(r.inputs.reactants.size() == 2);
+    CHECK(r.inputs.reactants[0].name == "A");
+    CHECK(r.inputs.reactants[1].name == "B");
+    REQUIRE(r.products.reactants.size() == 2);
+    CHECK(r.products.reactants[0].name == "C");
+    CHECK(r.products.reactants[1].name == "D");
 }
 
 TEST_CASE("DSL: decay reaction A >> rate >>= env")
@@ -61,6 +61,6 @@ TEST_CASE("DSL: decay reaction A >> rate >>= env")
 
     REQUIRE(v.reactions().size() == 1);
     const auto& r = v.reactions().front();
-    REQUIRE(r.products.items.size() == 1);
-    CHECK(r.products.items[0].is_environment());
+    REQUIRE(r.products.reactants.size() == 1);
+    CHECK(r.products.reactants[0].is_environment());
 }

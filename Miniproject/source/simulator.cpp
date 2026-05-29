@@ -70,7 +70,7 @@ namespace stochastic
 
     std::size_t Simulator::input_product(const ReactantList& inputs) const
     {
-        return std::accumulate(inputs.items.begin(), inputs.items.end(), std::size_t{1},
+        return std::accumulate(inputs.reactants.begin(), inputs.reactants.end(), std::size_t{1},
             [&](std::size_t acc, const Reactant& r) {
                 return r.is_environment() ? acc : acc * state[vessel.find_index(r.name)];
             });
@@ -79,7 +79,7 @@ namespace stochastic
     bool Simulator::can_fire(const Reaction& reaction) const
     {
         auto remaining = state;
-        for (const auto& reactant : reaction.inputs.items)
+        for (const auto& reactant : reaction.inputs.reactants)
         {
             if (reactant.is_environment()) continue;
             const auto idx = vessel.find_index(reactant.name);
@@ -92,7 +92,7 @@ namespace stochastic
     void Simulator::update_counts(const Reaction& reaction)
     {
         auto apply_delta = [&](const ReactantList& list, int delta) {
-            for (const auto& r : list.items) {
+            for (const auto& r : list.reactants) {
                 if (r.is_environment()) continue;
                 state[vessel.find_index(r.name)] += delta;
             }

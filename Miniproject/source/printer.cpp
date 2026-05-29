@@ -68,7 +68,7 @@ void Printer::visit(const Reaction& r)
               << "\",shape=\"oval\",style=\"filled\",fillcolor=\"yellow\"];\n";
 
     // Inputs: species -> reaction. Catalysts use arrowhead="tee".
-    for (const auto& in : r.inputs.items) {
+    for (const auto& in : r.inputs.reactants) {
         if (in.is_environment())
             continue;
         _impl->os << "  s" << _impl->species_id.lookup(in.name) << " -> r" << rid;
@@ -79,7 +79,7 @@ void Printer::visit(const Reaction& r)
 
     // Products: reaction -> species. Catalysts were already drawn as a single
     // tee-arrow input edge above, so skip them here to avoid a redundant edge.
-    for (const auto& out : r.products.items) {
+    for (const auto& out : r.products.reactants) {
         if (out.is_environment())
             continue;
         if (r.is_catalyst(out.name))

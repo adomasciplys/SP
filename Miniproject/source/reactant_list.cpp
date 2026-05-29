@@ -5,26 +5,31 @@
 
 namespace stochastic {
 
+// Linear scan by name.
 bool ReactantList::contains(const std::string& name) const
 {
-    return std::ranges::any_of(items,
+    return std::ranges::any_of(reactants,
                                [&](const Reactant& r) { return r.name == name; });
 }
 
+// 'A + B' start a new list with two reactants.
+// Parameters are taken by value and moved into the vector
 ReactantList operator+(Reactant a, Reactant b)
 {
     return ReactantList{{std::move(a), std::move(b)}};
 }
 
+// '(A + B) + C': Grows an existing list on the right
 ReactantList operator+(ReactantList list, Reactant r)
 {
-    list.items.push_back(std::move(r));
+    list.reactants.push_back(std::move(r));
     return list;
 }
 
+// 'A + (B + C)': Grows an existing list on the left.
 ReactantList operator+(Reactant r, ReactantList list)
 {
-    list.items.insert(list.items.begin(), std::move(r));
+    list.reactants.insert(list.reactants.begin(), std::move(r));
     return list;
 }
 
