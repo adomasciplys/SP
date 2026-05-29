@@ -54,6 +54,7 @@ struct Generator
 
         private:
             // Stores the most recently yielded value
+            // In Simulator this corresponds to the Sample
             std::optional<T> _current_value;
     };
 
