@@ -3,69 +3,78 @@
 #include "reactant.hpp"
 #include "reactant_list.hpp"
 #include "reaction.hpp"
+#include "symbol_table.hpp"
 #include "vessel.hpp"
 
-#include <algorithm>
+#include <cstddef>
+#include <fstream>
+#include <ostream>
 #include <stdexcept>
+#include <string>
 
 namespace stochastic {
 
-// Anonymous namespace: Helpers are invisible to other translation units.
-namespace {
-
-bool contains(const ReactantList& list, const std::string& name)
+// PIMPL
+struct Printer::Impl
 {
-    return std::ranges::any_of(list.items,
-                               [&](const Reactant& r) { return r.name == name; });
-}
+    std::ofstream file;                                // owned when constructed from a path; empty otherwise
+    std::ostream& os;                                  // binds to file or the caller's ostream
+    SymbolTable<std::string, std::size_t> species_id;  // species name -> s<i> id
+    std::size_t reaction_counter{0};                   // next r<i> id
 
-// A species is a catalyst of a reaction when it appears on both sides:
-// consumed as an input and produced again, with no net change in count.
-bool is_catalyst(const Reaction& r, const std::string& name)
-{
-    return contains(r.inputs, name) && contains(r.products, name);
-}
+    // ostream branch: no file, just adopt the caller's stream.
+    explicit Impl(std::ostream& target) : os(target) {}
 
-}  // namespace
+    // Path branch: create the parent dir if missing, then open the file.
+    explicit Impl(const std::filesystem::path& output_path)
+        : os(file)
+    {
+        if (auto parent = output_path.parent_path(); !parent.empty())
+            std::filesystem::create_directories(parent);
+        file.open(output_path);
+        if (!file)
+            throw std::runtime_error("Printer: cannot open " + output_path.string());
+    }
+};
 
-Printer::Printer(std::ostream& os) : _file(), _os(os) {}
+// Constructor overload for ostream
+Printer::Printer(std::ostream& os)
+    : _impl(std::make_unique<Impl>(os)) {}
 
-// Open `output_path` for writing; create the parent directory if it's missing.
+// Constructor overload for filesystem path
 Printer::Printer(const std::filesystem::path& output_path)
-    : _file()
-    , _os(_file)
-{
-    if (auto parent = output_path.parent_path(); !parent.empty())
-        std::filesystem::create_directories(parent);
-    _file.open(output_path);
-    if (!_file)
-        throw std::runtime_error("Printer: cannot open " + output_path.string());
-}
+    : _impl(std::make_unique<Impl>(output_path)) {}
 
+// Defined here, where Impl is complete, so the unique_ptr destructor can compile.
+Printer::~Printer() = default;
+
+// Print Reactant, just looks up name in symbol table
 void Printer::visit(const Reactant& r)
 {
     if (r.is_environment())
-        return;  // ∅ has no node in the graph
-    _os << "  s" << _species_id.lookup(r.name)
-        << "[label=\"" << r.name
-        << "\",shape=\"box\",style=\"filled\",fillcolor=\"cyan\"];\n";
+        return;  // ø has no node in the graph
+    _impl->os << "  s" << _impl->species_id.lookup(r.name)
+              << "[label=\"" << r.name
+              << "\",shape=\"box\",style=\"filled\",fillcolor=\"cyan\"];\n";
 }
 
+// Print Reaction
+// Skips catalysts on product side
 void Printer::visit(const Reaction& r)
 {
-    const auto rid = _reaction_counter++;
-    _os << "  r" << rid
-        << "[label=\"" << r.rate
-        << "\",shape=\"oval\",style=\"filled\",fillcolor=\"yellow\"];\n";
+    const auto rid = _impl->reaction_counter++;
+    _impl->os << "  r" << rid
+              << "[label=\"" << r.rate
+              << "\",shape=\"oval\",style=\"filled\",fillcolor=\"yellow\"];\n";
 
     // Inputs: species -> reaction. Catalysts use arrowhead="tee".
     for (const auto& in : r.inputs.items) {
         if (in.is_environment())
             continue;
-        _os << "  s" << _species_id.lookup(in.name) << " -> r" << rid;
-        if (is_catalyst(r, in.name))
-            _os << " [arrowhead=\"tee\"]";
-        _os << ";\n";
+        _impl->os << "  s" << _impl->species_id.lookup(in.name) << " -> r" << rid;
+        if (r.is_catalyst(in.name))
+            _impl->os << " [arrowhead=\"tee\"]";
+        _impl->os << ";\n";
     }
 
     // Products: reaction -> species. Catalysts were already drawn as a single
@@ -73,21 +82,23 @@ void Printer::visit(const Reaction& r)
     for (const auto& out : r.products.items) {
         if (out.is_environment())
             continue;
-        if (is_catalyst(r, out.name))
+        if (r.is_catalyst(out.name))
             continue;
-        _os << "  r" << rid << " -> s" << _species_id.lookup(out.name) << ";\n";
+        _impl->os << "  r" << rid << " -> s" << _impl->species_id.lookup(out.name) << ";\n";
     }
 }
 
+// Print the entire reaction network
+// Loops over species and reactions and passes in the Printer
 void Printer::visit(const Vessel& v)
 {
-    _os << "digraph {\n";
+    _impl->os << "digraph {\n";
 
     // Build the species -> s<i> index in insertion order.
     for (std::size_t i = 0; i < v.species().size(); ++i) {
         const auto& s = v.species()[i];
         if (!s.is_environment())
-            _species_id.insert(s.name, i);
+            _impl->species_id.insert(s.name, i);
     }
 
     for (const auto& s : v.species())
@@ -96,8 +107,8 @@ void Printer::visit(const Vessel& v)
     for (const auto& r : v.reactions())
         r.accept(*this);
 
-    _os << "}\n";
-    _os.flush();  // ensure the dot output is on disk before the caller does anything slow
+    _impl->os << "}\n";
+    _impl->os.flush();  // ensure the dot output is on disk. Experiences issues during testing without this
 }
 
 }  // namespace stochastic

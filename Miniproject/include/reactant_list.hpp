@@ -3,6 +3,7 @@
 
 #include "reactant.hpp"
 
+#include <string>
 #include <vector>
 
 namespace stochastic {
@@ -12,6 +13,9 @@ namespace stochastic {
 struct ReactantList
 {
     std::vector<Reactant> items;
+
+    // True iff any reactant in this list has the given name.
+    [[nodiscard]] bool contains(const std::string& name) const;
 };
 
 // `A + B`        -> a new list of two reactants.

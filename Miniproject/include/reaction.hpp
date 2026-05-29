@@ -6,6 +6,8 @@
 #include "reactant_list.hpp"
 #include "visitor.hpp"
 
+#include <string>
+
 namespace stochastic {
 
 // A complete reaction rule: `inputs --(rate)--> products`.
@@ -25,6 +27,13 @@ struct Reaction
     double rate;
 
     void accept(Visitor& v) const { v.visit(*this); }
+
+    // A species is a catalyst when it appears on both sides of this reaction:
+    // consumed as an input and produced again, with no net change in count.
+    [[nodiscard]] bool is_catalyst(const std::string& name) const
+    {
+        return inputs.contains(name) && products.contains(name);
+    }
 };
 
 // `... >>= X`        -> single product on the right-hand side.

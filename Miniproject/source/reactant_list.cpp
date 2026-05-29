@@ -1,8 +1,15 @@
 #include "reactant_list.hpp"
 
+#include <algorithm>
 #include <utility>
 
 namespace stochastic {
+
+bool ReactantList::contains(const std::string& name) const
+{
+    return std::ranges::any_of(items,
+                               [&](const Reactant& r) { return r.name == name; });
+}
 
 ReactantList operator+(Reactant a, Reactant b)
 {
