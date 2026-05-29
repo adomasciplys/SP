@@ -58,7 +58,7 @@ class thread_pool
     }
 
 public:
-    // Start `number_of_threads` workers (defaults to the machine's core count).
+    // Start 'number_of_threads' workers (defaults to the machine's core count).
     explicit thread_pool(size_t number_of_threads = std::jthread::hardware_concurrency())
     {
         // spawn the number of threads:
@@ -109,7 +109,7 @@ public:
 };
 
 // Wait on every future and gather the results into a plain vector, in order.
-// Takes the futures by rvalue because each future can only be get() once (it's consumed).
+// Takes the futures by rvalue because each future can only be get() once.
 template <typename T>
 std::vector<T> collect(std::vector<std::future<T>>&& futs)
 {
