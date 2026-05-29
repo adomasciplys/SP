@@ -3,7 +3,7 @@
 
 #include "simulator.hpp"
 #include "thread-pool.hpp"
-#include <type_traits>    // std::invoke_result_t: Deduces what `reduced_result` returns
+#include <type_traits>
 #include <vector>
 
 // Reduced is the function you supply to boil one finished simulation down to a single result.

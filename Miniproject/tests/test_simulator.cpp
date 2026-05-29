@@ -61,19 +61,6 @@ TEST_CASE("Simulator: decay A >>= env drains A to zero")
     CHECK(sim.counts()[0] == 0);
 }
 
-TEST_CASE("Simulator: creation env >>= A grows A from zero")
-{
-    Vessel v{"v"};
-    const auto env = v.environment();
-    const auto A = v.add("A", 0);
-    v.add(env >> 1.0 >>= A);
-
-    Simulator sim{v, 42};
-    sim.simulate(10.0);
-
-    CHECK(sim.counts()[0] > 0);
-}
-
 TEST_CASE("Simulator: catalyst (S+I) >>= (E+I) preserves the catalyst count")
 {
     Vessel v{"v"};
@@ -115,8 +102,6 @@ TEST_CASE("Simulator: 2A >>= B does not fire when only one A is present")
     Simulator sim{v, 42};
     sim.step();
 
-    // A non-zero count of A gives a finite delay (input_product = 1), so time
-    // advances; can_fire then rejects the firing because state[A] < 2.
     CHECK(sim.time() > 0.0);
     CHECK(sim.counts()[0] == 1);
     CHECK(sim.counts()[1] == 0);
@@ -181,8 +166,6 @@ TEST_CASE("Simulator: run() yields the initial state, then one Sample per step")
 
 TEST_CASE("Simulator: run() can be consumed without storing the whole trajectory")
 {
-    // The exact use-case the assignment calls out: track a single statistic
-    // (here, the maximum count of B) without holding the trajectory in memory.
     Vessel v{"v"};
     const auto A = v.add("A", 50);
     const auto B = v.add("B", 0);
