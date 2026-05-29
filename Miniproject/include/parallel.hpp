@@ -6,7 +6,9 @@
 #include <type_traits>
 #include <vector>
 
-// Reduced is the function you supply to boil one finished simulation down to a single result.
+// I have used AI to write parallel_runs
+
+// Reduced is the function supplied to reduce one finished simulation down to a single result.
 template <std::invocable<stochastic::Simulator&> Reduced>
 
 // All simulators share the same vessel and run n simulations
@@ -18,7 +20,7 @@ auto parallel_runs(const stochastic::Vessel& vessel, std::size_t n, std::size_t 
     -> std::vector<std::invoke_result_t<Reduced, stochastic::Simulator&>>
 {
     auto pool = thread_pool(num_threads);  // capped worker count, so we never over-subscribe
-    using Result = std::invoke_result_t<Reduced, stochastic::Simulator&>;  // per-run result type
+    using Result = std::invoke_result_t<Reduced, stochastic::Simulator&>;  // per run result type
     auto futures = std::vector<std::future<Result>>{};  // one future per run, kept in run order
 
     // Queue n independent simulations. Each run gets a distinct seed

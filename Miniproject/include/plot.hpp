@@ -1,18 +1,17 @@
 #ifndef MINIPROJECT_PLOT_HPP
 #define MINIPROJECT_PLOT_HPP
 
-#include <cstddef>
 #include <string>
 #include <vector>
 
-// Forward declarations so the public header doesn't drag in simulator.hpp.
+// Forward declarations, to not include Similator and everything with it
 namespace stochastic { struct Vessel; struct Simulator; }
 
 namespace plot
 {
 
 // One labeled line in a multi-series line plot.
-// `y` must align with the `times` vector passed to save_trajectory_plot
+// 'y' must align with the 'times' vector passed to save_trajectory_plot
 // y[i] is the value at times[i].
 struct PlotSeries
 {
@@ -20,24 +19,23 @@ struct PlotSeries
     std::vector<double> y;
 };
 
-// A complete trajectory ready to hand to save_trajectory_plot:
-// one PlotSeries per species, and a matching `times` column.
-// series[k] corresponds to v.species()[k]
+// A complete trajectory ready to hand to save_trajectory_plot.
+// One PlotSeries per species, and a matching 'times' column.
+// series[k] corresponds to v.species()[k].
 struct Trajectory
 {
     std::vector<double> times;
     std::vector<PlotSeries> series;
 };
 
-// Run `sim` until `end_time` (streaming via the Generator coroutine)
-// and collect every sample into a Trajectory.
+// Run simulation until end_time.
+// Collect every sample into a Trajectory.
 Trajectory collect_trajectory(const stochastic::Vessel& v,
                               stochastic::Simulator& sim,
                               double end_time);
 
 // Render a multi-series line plot to a PNG using Qt Charts.
-// If the trajectory has more than `max_points` samples,
-// it is uniformly downsampled to `max_points` before rendering.
+// If the trajectory has more than 'max_points' samples, it is uniformly downsampled
 void save_trajectory_plot(const std::string& filename,
                           const std::string& title,
                           const std::string& xlabel,

@@ -21,7 +21,7 @@ namespace plot
 namespace
 {
 
-// Qt requires exactly one QApplication per process
+// Qt requires exactly one QApplication per process: https://doc.qt.io/qt-6/qapplication.html
 // QApplication is built the first time a plot is rendered and reused on every subsequent call
 void ensure_qapplication()
 {
@@ -33,20 +33,22 @@ void ensure_qapplication()
     static QApplication app{argc, argv};
 }
 
-// Pick at most `max` indices from [0, n) at uniform stride.
+// Pick at most 'max' indices from [0, n) at uniform stride.
 // Used to thin out very long trajectories before plotting
 std::vector<std::size_t> stride_indices(std::size_t n, std::size_t max)
 {
     std::vector<std::size_t> idx;
     if (n == 0) return idx;
+
     // Nothing to thin: hand back every index.
     if (n <= max) {
         idx.reserve(n);
         for (std::size_t i = 0; i < n; ++i) idx.push_back(i);
         return idx;
     }
+
     // Otherwise step through [0, n) in `max` equally-spaced jumps.
-    // The last index is always n-1 (so the plot reaches the final sample
+    // The last index is always n-1 (so the plot reaches the final sample)
     idx.reserve(max);
     const double step = static_cast<double>(n - 1) / static_cast<double>(max - 1);
     for (std::size_t i = 0; i < max; ++i)
