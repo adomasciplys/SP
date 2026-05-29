@@ -5,11 +5,11 @@ time `t = 100` with seed `42`. The single-run column drives one trajectory per
 population; the 100-run column averages the per-run peak H count over 100 independent
 simulations dispatched in parallel via `parallel_runs`.
 
-| Population                  | Single run (peak H) | Mean over 100 runs (peak H) |
-| --------------------------- | ------------------: | --------------------------: |
-| 10.000                      |                   2 |                        3.54 |
-| 589.755 (Northern Jutland)  |                 119 |                       128.3 |
-| 5.822.763 (Denmark)         |               1 151 |                     1 190.1 |
+| Population                 | Single run (peak H) | Mean over 100 runs (peak H) |
+|----------------------------|--------------------:|----------------------------:|
+| 10.000                     |                   2 |                        3.54 |
+| 592.800 (Northern Jutland) |                 119 |                      129.14 |
+| 6.023.000 (Denmark)        |               1 200 |                    1 232.79 |
 
 ---
 

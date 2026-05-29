@@ -39,12 +39,12 @@ int main()
 
     // Single run (simulations = 1) at three population scales (Exercise 7)
     std::cout << "Peak hospitilization after 1 run - Population = 10.000:  " << mean_peak_hospitilzations(10'000, 1, 42) << '\n';
-    std::cout << "Peak hospitilization after 1 run - Population = 589.755:  " << mean_peak_hospitilzations(589'755, 1, 42) << '\n';
-    std::cout << "Peak hospitilization after 1 run - Population = 5.822.763:  "<< mean_peak_hospitilzations(5'822'763, 1, 42) << '\n';
+    std::cout << "Peak hospitilization after 1 run - Population = 592.800:  " << mean_peak_hospitilzations(592'800, 1, 42) << '\n';
+    std::cout << "Peak hospitilization after 1 run - Population = 6.023.000:  "<< mean_peak_hospitilzations(6'023'000, 1, 42) << '\n';
 
     // Mean peak hospitalization estimated over 100 parallel runs (Exercise 9)
     std::cout << "Mean peak hospitilization after 100 runs - Population 10.000:  " << mean_peak_hospitilzations(10'000, 100, 42) << '\n';
-    std::cout << "Mean peak hospitilization after 100 runs - Population 589.755:  "<< mean_peak_hospitilzations(589'755, 100, 42) << '\n';
-    std::cout << "Mean peak hospitilization after 100 runs - Population 5.822.763:  " << mean_peak_hospitilzations(5'822'763, 100, 42) << '\n';
+    std::cout << "Mean peak hospitilization after 100 runs - Population 592.800:  "<< mean_peak_hospitilzations(592'800, 100, 42) << '\n';
+    std::cout << "Mean peak hospitilization after 100 runs - Population 6.023.000:  " << mean_peak_hospitilzations(6'023'000, 100, 42) << '\n';
     return 0;
 }
