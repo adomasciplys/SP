@@ -1,8 +1,8 @@
 # SEIHR peak hospitalization
 
 Produced by `examples/seihr.cpp` (`mean_peak_hospitilzations(...)`), simulating up to
-time `t = 100` with seed `42`. The single-run column drives one trajectory per
-population; the 100-run column averages the per-run peak H count over 100 independent
+time `t = 100` with seed `42`. The single run column computes one trajectory per
+population; the 100 run column averages the per-run peak H count over 100 independent
 simulations dispatched in parallel via `parallel_runs`.
 
 | Population                 | Single run (peak H) | Mean over 100 runs (peak H) |
@@ -53,22 +53,22 @@ at two population sizes, with 5 repetitions per cell.
 
 ## Conclusions
 
-1. **Measurements are stable.** With 5 repetitions per cell, most CVs are below 5 %.
+1. **Measurements are stable.** 
+- With 5 repetitions per cell, most CVs are below 5 %.
 
-2. **The parallel implementation matches the sequential baseline.** `bm_parallel/1`
-   is within noise of `bm_sequential` at N = 10.000 (653 vs 651 ms, ~0.3 %). At
-   N = 100.000 there is a small ~4 % overhead from the pool (6 830 vs 6 563 ms),
-   submitting 100 tasks through a mutex-protected queue is not free
+2. **The parallel implementation matches the sequential baseline.** 
+- `bm_parallel/1` is within noise of `bm_sequential` at N = 10.000 (653 vs 651 ms, ~0.3 %)
+-  At N = 100.000 there is a small ~4 % overhead from the pool (6 830 vs 6 563 ms), submitting 100 tasks through a mutex-protected queue is not free
 
-3. **Scaling is near-linear up to the physical core count.** From 2 to 4 to 8 threads
-   I get 1.92×, 3.57×, 5.53× at N = 10.000 and 1.95×, 3.61×, 5.14× at N = 100.000.
-   About 69 % and 64 % of the ideal linear line at 8 threads
+3. **Scaling is near-linear up to the physical core count.** 
+-  At N = 10.000 I get 1.92×, 3.57×, 5.53× from 2 to 4 to 8 threads
+-  At N = 100.000 I get 1.95×, 3.61×, 5.14× from 2 to 4 to 8 threads
+-  This is About 69 % and 64 % of the ideal linear line at 8 threads
 
 4. **Over-subscription is not free, but on this workload it does not punish either.**
-   - At N = 10.000, going past 8 threads stalls at ~115 ms: no further speedup
-     (no more cores) and no measurable cost.
+   - At N = 10.000, going past 8 threads stalls at ~115 ms: no further speedup (no more cores) and no measurable cost.
    - At N = 100.000, `parallel/32` is actually slightly *faster* than `parallel/8`
      (median 1 129 vs 1 303 ms).
-5. **Population scales the work, not the shape of the conclusion.** N = 100.000 is
-   ~10× longer than N = 10.000. The speedup curve has the same shape at both
-   sizes. The workload is CPU-bound and embarrassingly parallel either way.
+5. **Population scales the work, not the shape of the conclusion.** 
+-    N = 100.000 is ~10× longer than N = 10.000. 
+-    The speedup curve has the same shape at both sizes.
