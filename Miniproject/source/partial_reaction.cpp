@@ -1,5 +1,4 @@
 #include "partial_reaction.hpp"
-
 #include <utility>
 
 namespace stochastic {
