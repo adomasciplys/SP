@@ -2,7 +2,6 @@
 #define MINIPROJECT_REACTION_HPP
 
 #include "partial_reaction.hpp"
-#include "reactant.hpp"
 #include "reactant_list.hpp"
 #include "visitor.hpp"
 
@@ -18,7 +17,7 @@ namespace stochastic {
 //   2. '... >> rate'         -> PartialReaction (operator>> in partial_reaction.hpp)
 //   3. '... >>= C + D'       -> Reaction        (operator>>= below)
 //
-// Operator precedence makes this parse without extra parens:
+// Operator precedence makes this parse without extra parenthesis:
 // '+' binds tighter than '>>', which binds tighter than '>>='.
 struct Reaction
 {
@@ -26,20 +25,20 @@ struct Reaction
     ReactantList products;
     double rate;
 
-    void accept(Visitor& v) const { v.visit(*this); }
-
-    // A species is a catalyst when it appears on both sides of this reaction:
-    // consumed as an input and produced again, with no net change in count.
+    // A species is a catalyst when it appears on both sides of this reaction.
+    // Consumed as an input and produced again, with no net change in count.
     [[nodiscard]] bool is_catalyst(const std::string& name) const
     {
         return inputs.contains(name) && products.contains(name);
     }
+
+    void accept(Visitor& v) const { v.visit(*this); }
 };
 
-// `... >>= X`        -> single product on the right-hand side.
+// '... >>= X'        -> single product on the right hand side.
 Reaction operator>>=(PartialReaction pr, Reactant product);
 
-// `... >>= X + Y`    -> multiple products on the right-hand side.
+// '... >>= X + Y'    -> multiple products on the right hand side.
 Reaction operator>>=(PartialReaction pr, ReactantList products);
 
 }  // namespace stochastic
