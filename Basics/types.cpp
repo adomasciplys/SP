@@ -75,7 +75,7 @@ void type_size_test() {
     assert(sizeof(float) == 4);
     assert(sizeof(double) == 8);
     // Other fundamental types:
-    // assert(sizeof(void) == 0);
+    //assert(sizeof(void) == 0);
     assert(sizeof(nullptr) == 8);
 
     // Compare pointers and references:

@@ -43,3 +43,6 @@ add_executable(passing_bm passing_bm.cpp)
 target_link_libraries(passing_bm PRIVATE passing) # links benchmark with the library
 add_test(NAME passing_bm COMMAND passing_bm 5) # a test command `passing_bm 5`
 set_tests_properties(measure_test passing_bm PROPERTIES RUN_SERIAL ON) # run independently
+
+add_executable(testing_array testing_array.cpp)
+add_executable(testing_vector testing_vector.cpp)
