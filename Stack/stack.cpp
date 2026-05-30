@@ -2,22 +2,19 @@
 #include <vector>
 #include <sstream>
 
-/// TODO: write the definitions (implementation) of the stack library here:
-/// TODO: implement Stack member functions within stp namespace
-/// TODO: implement non-member functions
 namespace stp {
 
 void Stack::grow()
 {
-    std::size_t newCap = (capacity_ == 0) ? 4 : capacity_ * 2;
+    std::size_t newCap = (_capacity == 0) ? 4 : _capacity * 2;
 
     double* newData = new double[newCap];  // allocate new array
-    for (std::size_t i = 0; i < size_; ++i) {
-        newData[i] = std::move(data_[i]);  // move elements over
+    for (std::size_t i = 0; i < _size; ++i) {
+        newData[i] = _data[i];  // move elements over
     }
-    delete[] data_;  // free old array
-    data_ = newData;
-    capacity_ = newCap;
+    delete[] _data;  // free old array
+    _data = newData;
+    _capacity = newCap;
 }
 
 Stack::Stack(std::initializer_list<double> init)
@@ -27,53 +24,51 @@ Stack::Stack(std::initializer_list<double> init)
     }
 }
 
-Stack::Stack() = default;  // default constructor
-
 Stack::~Stack()
 {
-    delete[] data_;  // free allocated memory
+    delete[] _data;  // free allocated memory
 }
 
 bool Stack::is_empty() const
 {
-    return size_ == 0;
+    return _size == 0;
 }
 
 std::size_t Stack::size() const
 {
-    return size_;
+    return _size;
 }
 
 void stp::Stack::push(double value)
 {
-    if (size_ == capacity_) {
+    if (_size == _capacity) {
         grow();
     }
-    data_[size_++] = value;
+    _data[_size++] = value;
 }
 
 double& Stack::top()
 {
-    assert(size_ != 0);
-    return data_[size_ - 1];
+    assert(_size != 0);
+    return _data[_size - 1];
 }
 
 const double& Stack::top() const
 {
-    assert(size_ != 0);
-    return data_[size_ - 1];
+    assert(_size != 0);
+    return _data[_size - 1];
 }
 
 double Stack::pop()
 {
-    assert(size_ != 0);
-    return data_[--size_];
+    assert(_size != 0);
+    return _data[--_size];
 }
 
 double Stack::get(std::size_t index) const
 {
-    assert(index <= size_ - 1);
-    return data_[index];
+    assert(index <= _size - 1);
+    return _data[index];
 }
 
 std::ostream& operator<<(std::ostream& os, const Stack& s)
