@@ -34,8 +34,10 @@ Trajectory collect_trajectory(const stochastic::Vessel& v,
                               stochastic::Simulator& sim,
                               double end_time);
 
+// Note: The drawing logic of this function was drafted using an AI assistant
+// to save time on reading Qt documentation
+// The code has been reviewed. I assume full responsibility for its content.
 // Render a multi-series line plot to a PNG using Qt Charts.
-// All samples are drawn — fine for the trajectory sizes this project produces.
 void save_trajectory_plot(const std::string& filename,
                           const std::string& title,
                           const std::string& xlabel,

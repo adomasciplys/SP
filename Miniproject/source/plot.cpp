@@ -54,6 +54,10 @@ Trajectory collect_trajectory(const stochastic::Vessel& v,
     return result;
 }
 
+
+// Note: The drawing logic of this function was drafted using an AI assistant
+// to save time on reading Qt documentation
+// The code has been reviewed. I assume full responsibility for its content.
 void save_trajectory_plot(const std::string& filename,
                           const std::string& title,
                           const std::string& xlabel,
