@@ -37,8 +37,8 @@ int main()
     mtqueue<int> queue;
 
     constexpr size_t producer_count = 2;
-    constexpr size_t consumer_count = 2;
-    constexpr size_t items_per_producer = 1000;
+    constexpr size_t consumer_count = 10;
+    constexpr size_t items_per_producer = 10000000;
     constexpr size_t total_items = producer_count * items_per_producer;
     constexpr size_t items_per_consumer = total_items / consumer_count;
 
