@@ -61,6 +61,11 @@ ctest --test-dir build
        that can be iterated over
 3. Examine examples in [coroutines_test.cpp](tests/coroutines_test.cpp):
    - What library is used to implement `Fibonacci()`?
+   - coro::generator (Third-Party): Before C++23, developers relied on open-source libraries to use coroutines effectively. 
+   - The most famous of these is cppcoro (written by Lewis Baker, one of the architects of C++ coroutines).
+   - Many codebases imported his generator or built their own under a custom coro:: namespace.
+     std::generator (Official Standard): Introduced in C++23 (<generator>), this is the official, compiler-guaranteed implementation. 
+   - It heavily borrowed from cppcoro but was refined and standardized by the C++ committee.
 4. Create a [Collatz](https://en.wikipedia.org/wiki/Collatz_conjecture) sequence generator coroutine for a given positive starting number. 
    * For example, the following is the sequence starting with 7:
      `7 22 11 34 17 52 26 13 40 20 10 5 16 8 4 2 1`. **IMPLEMENTED**
