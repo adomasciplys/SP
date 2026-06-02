@@ -17,6 +17,8 @@ void add_divisor_filter(filters_t& container)
 {
     // You cannot capture a global variable
     // So you have to assign the global divisor to a local divisor
+    // default capture of static variable captures by reference
+    // fix: create a copy and capture by copy, explicitly
     container.emplace_back([divisor = divisor](int value) { return value % divisor == 0; });
 }
 

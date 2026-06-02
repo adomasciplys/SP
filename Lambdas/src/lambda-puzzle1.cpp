@@ -13,7 +13,7 @@ using filters_t = std::vector<std::function<bool(int)>>;
 
 void add_divisor_filter(filters_t& container, int divisor)
 {
-    // We need to take by value, not by reference
+    // We need to take divisor by value [divisor], not by reference [&]
     // Since divisor is a local variable, we "lose" the reference when we try to add_divisor_filter
     container.emplace_back([divisor](int value) { return value % divisor == 0; });
 }
