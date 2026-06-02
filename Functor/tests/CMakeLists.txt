@@ -1,0 +1,11 @@
+add_executable(function_traits_test function_traits_test.cpp)
+target_link_libraries(function_traits_test PRIVATE doctest::doctest_with_main)
+add_test(NAME function_traits_test COMMAND function_traits_test)
+
+add_executable(fmap_optional_test fmap_optional_test.cpp)
+target_link_libraries(fmap_optional_test PRIVATE doctest::doctest_with_main)
+add_test(NAME fmap_optional_test COMMAND fmap_optional_test)
+
+add_executable(fmap_vector_test fmap_vector_test.cpp)
+target_link_libraries(fmap_vector_test PRIVATE doctest::doctest_with_main)
+add_test(NAME fmap_vector_test COMMAND fmap_vector_test)

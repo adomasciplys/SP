@@ -1,0 +1,8 @@
+*~
+.idea
+.vs
+build
+build-debug
+build-release
+cmake-build*
+out
