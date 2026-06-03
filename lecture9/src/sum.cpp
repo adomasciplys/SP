@@ -51,10 +51,13 @@ int sum(Container1&& c1, Container2&& c2)
 // Exercise 9.2.5
 // Generalize both function templates into one variadic function template taking arbitrary number of arguments.
 // Use parameter pack and fold expression.
+//
 template <typename ...Args>
-requires (is_container_of_int_v<Args> && ...)
-int sum (Args && ...args)
+requires (is_container_of_int_v<Args>&& ...)
+int sum (Args&& ...args)
 {
+    // binary left fold with the form: (init op ... op pack) -> ((init op p1) op p2) op pN
+    //  ((( 0 + sum(a₁) ) + sum(a₂) ) + sum(a₃))
     return (0 + ... + sum(args));
 }
 
@@ -88,9 +91,9 @@ TEST_CASE("Perfect forwarding")
         auto s = sum();
         CHECK(s == 0);
     }
-    SUBCASE("6) type-check the container") {
-        auto s = sum(50);
-    }
+    //SUBCASE("6) type-check the container") {
+    //    auto s = sum(50);
+    //}
 }
 
 /**
@@ -113,10 +116,11 @@ TEST_CASE("Perfect forwarding")
 // Function object for computing sum over arbitrary number of containers
 struct summation
 {
-    template <typename ...Container>
-    requires (is_container_of_int_v<Container> && ...)
-    int operator()(Container && ...containers) const
+    template <typename ...Container> // Declares a template that accepts a variable number of types, named 'Container'.
+    requires (is_container_of_int_v<Container>&& ...) // Enforces a rule that every type in 'Container' must hold integers.
+    int operator()(Container&& ...containers) const // Each Container is a Universal Reference
     {
+        // Preserves the exact type of each container and passes them to a separate 'sum' function, then returns the result.
         return sum(std::forward<Container>(containers)...);
     }
 };
@@ -125,12 +129,18 @@ struct summation
 // Exercise 9.3.3
 // Exercise 9.3.4
 // Exercise 9.3.5
-// Lazy evaluation function template using std::bind
 template <typename Fn, typename ...Containers>
 requires std::is_invocable_v<Fn, Containers...> && (is_container_of_int_v<Containers> && ...)
-auto lazy(Fn fn, Containers && ...containers)
+auto lazy(Fn fn, Containers&& ...containers)
 {
-    return std::bind(fn, std::forward<Containers>(containers)...);
+    // fn = std::move(fn) moves the Function into the Lambda Expression.
+    // ...containers = std::forward<Containers>(containers) stores the Parameter Pack into the Lambda Expression.
+    // mutable permits the Lambda Expression to change the stored Function and the stored Parameter Pack.
+    return [fn = std::move(fn), ...containers = std::forward<Containers>(containers)]() mutable
+    {
+        // Executes the stored function and passes the unpacked stored containers to it.
+        return fn(containers...);
+    };
 }
 
 
