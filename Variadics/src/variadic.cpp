@@ -3,8 +3,22 @@
 #include <type_traits>
 #include <sstream>
 #include <iomanip>	// quoted
+#include <type_traits>
+#include <string_view>
 
 #include <doctest/doctest.h>
+
+template<typename T>
+constexpr bool is_string_like_v = std::is_convertible_v<T, std::string_view>;
+
+template <typename T>
+void stringify(std::ostream& os, const T& arg)
+{
+	if constexpr (is_string_like_v<T>)
+		os << std::quoted(arg);
+	else
+		os << arg;
+}
 
 /** Tuple motivation: store the arguments for lazy evaluation */
 template <typename Fn, typename... Args>
@@ -37,10 +51,10 @@ TEST_CASE("Lazy function evaluation")
 
 /** Concatenate arbitrary arguments by outputting them into a stream */
 template <typename... Args>
-std::string concat(Args&&...)
+std::string concat(Args&&... args)
 {
-	/** TODO: implement string concatenation of arguments using ostringstream */
 	auto os = std::ostringstream{};
+	(os << ... << args);
 	return os.str();
 }
 
@@ -52,39 +66,65 @@ TEST_CASE("Variadic argument concatenation")
 
 /** Log arguments in JSON format */
 template <typename... Args>
-std::string json_log(Args...)
+std::string json_log(Args... args)
 {
-	/** TODO: implement concatenation in JSON format:
-	 * '[' arg0 ',' arg1 ',' ... ']'
-	 * where string arguments are quoted (using std::quoted)
-	 * DRY code by using helper function to stringify based on type
-	 */
 	auto os = std::ostringstream{};
+	os << '[';
+	const char* sep = "";
+	((os << sep, stringify(os, args), sep = ","), ...);
+	os << ']';
 	return os.str();
+}
+
+template <typename Tuple, std::size_t... Is>
+void stringify_tuple(std::ostream& os, const Tuple& t, std::index_sequence<Is...>)
+{
+	const char* sep = "";
+	((os << sep, stringify(os, std::get<Is>(t)), sep = ","), ...);
 }
 
 /** Log std::tuple in JSON format */
 template <typename... Args>
-std::string json_log(const std::tuple<Args...>&)
+std::string json_log(const std::tuple<Args...>& args)
 {
-	/** TODO: implement concatenation in JSON format:
-	 * '{' arg0 ',' arg1 ',' ... '}'
-	 * where string arguments are quoted (using std::quoted)
-	 * try outputting the first and then tag-dispatch the rest with make_index_sequence
-	 */
 	auto os = std::ostringstream{};
+	os << '{';
+	stringify_tuple(os, args, std::index_sequence_for<Args...>{});
+	os << '}';
 	return os.str();
 }
 
-template <typename C>
-std::string json_log(const C&)
+template <typename T>
+concept is_char = std::same_as<T, char>;
+
+template <typename T>
+concept not_char = !is_char<T>;
+
+template <typename T>
+concept Container = requires(T&& c) {
+	// 1. Simple requirement: std::end(c) must be a valid expression
+	{ std::end(c) };
+
+	// 2. Compound requirement: Dereferencing the begin iterator
+	//    must result in a type that satisfies the 'not_char' concept
+	{ *std::begin(c) } -> not_char;
+
+	// 3. Nested requirement: The destructor of T must be marked noexcept
+	requires noexcept(c.~T());
+} && sizeof(T) <= 32; // 4. Conjunction: The object size itself cannot exceed 32 bytes
+
+template <Container C>
+std::string json_log(const C& c)
 {
-	/** TODO: implement concatenation of a container content in JSON format:
-	 * '[' c[0] ',' c[1] ',' ... ']'
-	 * where string arguments are quoted (using std::quoted)
-	 * use SFINAE to restrict the overloading to containers which do not contain characters
-	 */
 	auto os = std::ostringstream{};
+	os << '[';
+	const char* sep = "";
+	for (const auto& elem : c) {
+		os << sep;
+		stringify(os, elem);
+		sep = ",";
+	}
+	os << ']';
 	return os.str();
 }
 

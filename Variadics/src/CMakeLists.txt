@@ -30,7 +30,7 @@ target_link_libraries(power_test PRIVATE doctest::doctest_with_main)
 add_test(NAME power_test COMMAND power_test)
 
 add_executable(type_name_boost type_name_boost.cpp)
-target_link_libraries(type_name_boost PRIVATE Boost::type_index doctest::doctest_with_main)
+target_link_libraries(type_name_boost PRIVATE Boost::headers doctest::doctest_with_main)
 add_test(NAME type_name_boost COMMAND type_name_boost)
 
 add_executable(variadic variadic.cpp)
